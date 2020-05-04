@@ -1,0 +1,32 @@
+{
+  "name": "Master-music",
+  "version": "1.0.0",
+  "description": "-> Proiect la Procesarea Datelor Audio Video\r -> Proiect de licență",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "parcel ./index.html"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/EmmaDance/Master-music.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/EmmaDance/Master-music/issues"
+  },
+  "homepage": "https://github.com/EmmaDance/Master-music#readme",
+  "dependencies": {
+    "audiosynth": "0.0.5",
+    "helmet": "3.22.0",
+    "jquery": "3.5.0",
+    "jquery-ui-dist": "1.12.1",
+    "js": "0.1.0",
+    "opensheetmusicdisplay": "^0.7.3",
+    "osmd-audio-player": "^0.1.4",
+    "popper.js": "1.16.1",
+    "regenerator-runtime": "0.13.5"
+  }
+}
