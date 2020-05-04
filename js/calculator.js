@@ -137,9 +137,6 @@ function getIndexOfMax2(data) {
     return k1 > k2 ? k2 : k1;
 }
 
-function getMax(data) {
-    return data.reduce((max, p) => p > max ? p : max, data[0]);
-}
 
 
 

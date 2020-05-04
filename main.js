@@ -6,42 +6,37 @@ require("./js/jquery-3.4.1");
 import {OpenSheetMusicDisplay} from "opensheetmusicdisplay";
 import AudioPlayer from "osmd-audio-player";
 import 'regenerator-runtime/runtime'
-function registerButtonEvents(audioPlayer) {
-    document.getElementById("btn-play").addEventListener("click", () => {
-        if (audioPlayer.state === "STOPPED" || audioPlayer.state === "PAUSED") {
-            audioPlayer.play();
-        }
-    });
-    document.getElementById("btn-pause").addEventListener("click", () => {
-        if (audioPlayer.state === "PLAYING") {
-            audioPlayer.pause();
-        }
-    });
-    document.getElementById("btn-stop").addEventListener("click", () => {
-        if (audioPlayer.state === "PLAYING" || audioPlayer.state === "PAUSED") {
-            audioPlayer.stop();
-        }
-    });
-}
+import {getSong} from "./js/sheet-music";
 
 $(document).ready(function () {
     import("./js/playKeyboard").then(function (kb) {
         kb.playKeyboard();
     });
 
+    renderPage();
+
+    function renderPage() {
+        if (localStorage.getItem("hasScore")) {
+            loadMusic(localStorage.getItem("score"));
+            $("#initialize").css("display", "none");
+            $("#navigation").css("display", "inline");
+            $("#pages").css("display", "inline");
+        }
+    }
+
     function readFile(input) {
         let file = input.files[0];
         let reader = new FileReader();
         reader.readAsText(file);
         reader.onload = function () {
-           loadMusic(reader.result);
+            loadMusic(reader.result);
         };
         reader.onerror = function () {
             console.log(reader.error);
         };
     }
 
-    async function loadMusic(sheetMusic){
+    async function loadMusic(sheetMusic) {
         // let osmd = new OpenSheetMusicDisplay("score", {
         //     autoResize: true,
         //     backend: "svg",
@@ -59,8 +54,11 @@ $(document).ready(function () {
         await audioPlayer.loadScore(osmd);
 
         registerButtonEvents(audioPlayer);
-
-        $("#initialize").css("display", "none");
+        if (!localStorage.getItem("hasScore")) {
+            localStorage.setItem('score', sheetMusic);
+            localStorage.setItem('hasScore', 'true');
+            renderPage();
+        }
     }
 
     // sheet music
@@ -69,8 +67,6 @@ $(document).ready(function () {
         readFile(file);
     });
 
-
-    // let loadPromise = osmd.load("https://drive.google.com/open?id=1WrfyjhurNg-SHowwOz41MGNtVTPJeIdU");
 
     // // "upload-dropzone" is the camelized version of the HTML element's ID
     // Dropzone.options.uploaddropzone = {
@@ -91,29 +87,6 @@ $(document).ready(function () {
     //         this.on("addedfile", function(file) { alert("Added file."); });
     //     }
     // };
-
-
-    function getSong() {
-        // let notes = "c c d c f e c c d c g f c c c a f e d b b a f g f";
-        let notes = "C4 C4 D4 C4 F4 E4 C4 C4 D4 C4 G4 F4 C4 C4 C5 A4 F4 E4 D4 B4 B4 A4 F4 G4 F4";
-        // notes = notes.toUpperCase();
-        let newNotes = [];
-        let prev = {"A": "G", "B": "A", "C": "B", "D": "C", "E": "D", "F": "E", "G": "F",};
-        // let flats = "a b d e";
-        let flats = "b";
-        flats = flats.toUpperCase();
-        flats = flats.split(" ");
-        notes = notes.split(" ");
-        for (let note of notes) {
-            if (flats.includes(note[0])) {
-                note = prev[note[0]] + "#" + note[1];
-            }
-            newNotes.push(note);
-        }
-        // console.log(notes);
-        // console.log(newNotes);
-        return newNotes;
-    }
 
     let running = false;
     let song = getSong();
@@ -178,7 +151,6 @@ $(document).ready(function () {
                         microphone.connect(analyser);
                         // microphone.connect(biquadFilter);
                         // biquadFilter.connect(analyser);
-                        // analyser.connect(audioCtx.destination);
                         start();
                     });
                 })
@@ -267,7 +239,6 @@ $(document).ready(function () {
             for (let i = 0; i < bufferLength; i++) {
                 barHeight = dataArray[i];
 
-                // canvasCtx.fillStyle = 'rgb(0,0,' + (barHeight + 100) + ')';
                 canvasCtx.fillStyle = 'rgb(15,31,35)';
                 canvasCtx.fillRect(x, HEIGHT - barHeight / 2, barWidth, barHeight / 2);
 
@@ -277,3 +248,21 @@ $(document).ready(function () {
         frame();
     }
 });
+
+function registerButtonEvents(audioPlayer) {
+    document.getElementById("btn-play").addEventListener("click", () => {
+        if (audioPlayer.state === "STOPPED" || audioPlayer.state === "PAUSED") {
+            audioPlayer.play();
+        }
+    });
+    document.getElementById("btn-pause").addEventListener("click", () => {
+        if (audioPlayer.state === "PLAYING") {
+            audioPlayer.pause();
+        }
+    });
+    document.getElementById("btn-stop").addEventListener("click", () => {
+        if (audioPlayer.state === "PLAYING" || audioPlayer.state === "PAUSED") {
+            audioPlayer.stop();
+        }
+    });
+}
