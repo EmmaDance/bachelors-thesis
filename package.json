@@ -28,7 +28,6 @@
     "koa": "2.11.0",
     "koa-bodyparser": "4.3.0",
     "koa-router": "8.0.8",
-    "opensheetmusicdisplay": "^0.7.3",
     "osmd-audio-player": "^0.1.4",
     "popper.js": "1.16.1"
   },

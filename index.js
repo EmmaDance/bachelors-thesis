@@ -1,9 +1,10 @@
-import {binarySearch, energy, getIndexOfMax, mapFrequencies} from "./js/calculator";
+import {binarySearch, energy, getIndexOfMax, mapFrequencies, mapNotes} from "./js/calculator";
 import {OpenSheetMusicDisplay} from "opensheetmusicdisplay";
 import AudioPlayer from "osmd-audio-player";
 import 'regenerator-runtime/runtime'
 import {getSong} from "./js/sheet-music.js";
-import {parseMusic} from "./js/sheet-music";
+import {getScore, parseMusic, readFile} from "./js/sheet-music";
+import {registerButtonEvents} from "./js/audio-player";
 
 let jquery = require("jquery");
 window.$ = window.jQuery = jquery;
@@ -11,6 +12,7 @@ require("./js/jquery-3.4.1");
 let song = [];
 
 $(document).ready(function () {
+
     import("./js/playKeyboard").then(function (kb) {
         kb.playKeyboard();
     });
@@ -23,55 +25,22 @@ $(document).ready(function () {
             $("#pages").css("display", "inline");
         }
     }
-
     renderPage();
 
-    function readFile(input) {
-        let file = input.files[0];
-        let reader = new FileReader();
-        reader.readAsText(file);
-        reader.onload = function () {
-            loadMusic(reader.result);
-        };
-        reader.onerror = function () {
-            console.log(reader.error);
-        };
-    }
-
-    $('#get-sample').click(async function () {
-        let score = await getScore();
-        await loadMusic(score);
-    });
-
-    async function getScore() {
-        const url = 'http://localhost:3000/score/sample';
-
-        return await $.ajax({
-            url: url,
-            type: 'GET',
-            success: function (res) {
-                return res;
-            },
-            error: function (xhr, status, error) {
-                console.log(error);
-            }
-
-        });
-    }
-
     async function loadMusic(sheetMusic) {
-        // let osmd = new OpenSheetMusicDisplay("score", {
-        //     autoResize: true,
-        //     backend: "svg",
-        //     drawingParameters: "allon",
-        //     pageFormat: "Endless",
-        //     followCursor: true,
-        //     disableCursor: false,
-        //     coloringEnabled: true,
-        // });
         song = parseMusic(sheetMusic);
         let init_song = $("#init-song");
-        let osmd = new OpenSheetMusicDisplay(document.getElementById("score"));
+        let osmd = new OpenSheetMusicDisplay("score", {
+            autoResize: true,
+            backend: "svg",
+            drawingParameters: "allon",
+            drawCredits: false,
+            pageFormat: "Endless",
+            followCursor: true,
+            disableCursor: false,
+            coloringEnabled: true,
+        });
+        // let osmd = new OpenSheetMusicDisplay(document.getElementById("score"));
         await osmd.load(sheetMusic);
         await osmd.render();
         const audioPlayer = new AudioPlayer();
@@ -93,27 +62,20 @@ $(document).ready(function () {
         registerButtonEvents(audioPlayer);
     }
 
-    // sheet music
     $("#upload-btn").on("click", function () {
         let file = document.getElementById('file-input');
         readFile(file);
     });
 
-    let running = false;
-    let crt = 0;
-    let crt_song = $("#crt-song");
+    $('#get-sample').click(async function () {
+        let score = await getScore();
+        await loadMusic(score);
+    });
 
     // Older browsers might not implement mediaDevices at all, so we set an empty object first
     if (navigator.mediaDevices === undefined) {
         navigator.mediaDevices = {};
     }
-
-    $("#start").on("click", function () {
-        startRecording();
-    });
-    $("#stop").on("click", function () {
-        stopRecording();
-    });
 
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     console.log(audioCtx.sampleRate);
@@ -127,12 +89,22 @@ $(document).ready(function () {
     let dataArray = new Uint8Array(bufferLength);
     let frequencies = {};
     let notes = {};
+    let noteMap = {};
     analyser.fftSize = 4096;
     const bandSize = audioCtx.sampleRate / analyser.fftSize;
-
+    let running = false;
+    let crt = 0;
+    let crt_song = $("#crt-song");
 
     // Audio Buffer - to access the raw PCM data (in case we need it)
     // let myArrayBuffer = audioCtx.createBuffer(2, audioCtx.sampleRate, audioCtx.sampleRate);
+
+    $("#start").on("click", function () {
+        startRecording();
+    });
+    $("#stop").on("click", function () {
+        stopRecording();
+    });
 
     function stopRecording() {
         audioCtx.suspend().then(() => {
@@ -151,6 +123,8 @@ $(document).ready(function () {
                     console.log("Success");
                     running = true;
                     mapFrequencies(notes, frequencies);
+                    mapNotes(noteMap, notes);
+                    console.log(noteMap);
                     audioCtx.resume().then(() => {
                         const microphone = audioCtx.createMediaStreamSource(stream);
                         microphone.connect(analyser);
@@ -168,34 +142,8 @@ $(document).ready(function () {
         }
     }
 
-    function lower(note1, note2) {
-        if(!(note1 && note2))
-            return 0;
-        console.log("lower: " + note1 + " - " + note2);
-        const octave1=note1[note1.length-1];
-        const octave2=note2[note2.length-1];
-        if (octave1 < octave2)
-            return 1;
-        if (octave2<octave1)
-            return -1;
-        if (note1[0] < note2[0])
-            return 1;
-        if (note2[0] < note1[0])
-            return -1;
-        // if note 2 has a sharp in it, it is higher
-        if  (note2.length>note1.length)
-            return 1;
-        return -1;
-    }
-
     function correct() {
         $("#correct").css("color", "green");
-        $("#up").css("color", "whitesmoke");
-        $("#down").css("color", "whitesmoke");
-    }
-
-    function none() {
-        $("#correct").css("color", "whitesmoke");
         $("#up").css("color", "whitesmoke");
         $("#down").css("color", "whitesmoke");
     }
@@ -250,16 +198,16 @@ $(document).ready(function () {
             // console.log("NEW FRAME");
             // console.log(indexOfMax);
             // console.log(bandSize);
-            // console.log(min);
-            // console.log(max);
+            console.log(min);
+            console.log(max);
             console.log(frequency);
             let crtNote = notes[frequency];
-            console.log(crtNote);
-            console.log(note);
+            // console.log(crtNote);
+            // console.log(note);
 
             if (crtNote === note) {
                 len++;
-                if (len > 3) {
+                if (len > 5) {
                     // display the note
                     $("#note").text(crtNote);
                 }
@@ -267,11 +215,9 @@ $(document).ready(function () {
                 len = 1;
                 note = crtNote;
             }
-
             console.log("note is "+note);
             console.log("song[crt] is "+song[crt]);
             if (note === song[crt]) {
-                correct();
                 crt_song.append(" " + note);
                 crt++;
                 // song finished
@@ -279,14 +225,20 @@ $(document).ready(function () {
                     $("#congrats").css("visibility", "visible");
                     stopRecording();
                 }
-            } else if (lower(note, song[crt])===1) {
+            }
+
+            if(crtNote === song[crt])
+                correct();
+            else if(noteMap[crtNote]<noteMap[song[crt]]){
                 down();
-            } else if (lower(note, song[crt])===-1){
+            }
+            else {
                 up();
             }
-            else{
-                none();
-            }
+            console.log(note);
+            console.log(noteMap[crtNote]);
+            console.log(song[crt]);
+            console.log(noteMap[song[crt]]);
 
             canvasCtx.fillStyle = 'rgb(255, 255, 255)';
             canvasCtx.fillRect(0, 0, WIDTH, HEIGHT);
@@ -308,22 +260,5 @@ $(document).ready(function () {
     }
 });
 
-function registerButtonEvents(audioPlayer) {
-    document.getElementById("btn-play").addEventListener("click", () => {
-        if (audioPlayer.state === "STOPPED" || audioPlayer.state === "PAUSED") {
-            audioPlayer.play();
-        }
-    });
-    document.getElementById("btn-pause").addEventListener("click", () => {
-        if (audioPlayer.state === "PLAYING") {
-            audioPlayer.pause();
-        }
-    });
-    document.getElementById("btn-stop").addEventListener("click", () => {
-        if (audioPlayer.state === "PLAYING" || audioPlayer.state === "PAUSED") {
-            audioPlayer.stop();
-        }
-    });
-}
 
 

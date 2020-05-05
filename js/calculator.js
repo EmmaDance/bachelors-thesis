@@ -1,3 +1,7 @@
+
+// Creates two maps
+// notes = a map with pairs (frequency, note)
+// frequencies = a map with pairs (index, frequency)
 export function mapFrequencies(notes, frequencies) {
     const a = Math.pow(2, 1 / 12);
     const note_names = ["A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#"];
@@ -30,13 +34,21 @@ export function mapFrequencies(notes, frequencies) {
 
 }
 
+// create map of pairs (note, frequency)
+export function mapNotes(noteMap, notes) {
+    for ( const frequency in notes){
+        noteMap[notes[frequency]] = frequency;
+    }
+}
+
 export function binarySearch(frequencies, min, max) {
-    var size = Object.keys(frequencies).length;
+    const err = (max-min)*0.2;
+    const size = Object.keys(frequencies).length;
     let start = 0, end = size - 1;
     while (start <= end) {
         let mid = Math.floor((start + end) / 2);
         let elem = frequencies[mid];
-        if (elem >= min && elem <= max)
+        if (elem >= min-err && elem <= max+err)
             return elem;
         else if (elem < min) {
             start = mid + 1;
@@ -44,7 +56,7 @@ export function binarySearch(frequencies, min, max) {
             end = mid - 1;
         }
     }
-    return "11";
+    return "1";
 }
 
 export function energy(signal) {
@@ -64,9 +76,8 @@ function zcr(signal) {
     }
 
     let avg = sum / signal.length;
-    console.log("AVG = ", avg);
+    // console.log("AVG = ", avg);
     let zcr = 0;
-    // should be mean value, not 0
     let zero = avg;
     for (let i = 1; i < signal.length; i++) {
         if ((signal[i - 1] >= zero && signal[i] < zero) ||
@@ -99,18 +110,18 @@ function getNMax(data, n) {
         let res = getMaxAndIndex(data);
         let idx = res.index;
         data[idx] = -Infinity;
-        console.log("res = ", res);
+        // console.log("res = ", res);
         // let max = res.value;
         spikes.push(idx);
     }
-    console.log("getNMax: ", spikes);
+    // console.log("getNMax: ", spikes);
     return spikes;
 }
 
 export function getIndexOfMax(data) {
     let spikes = getNMax(data, 2);
     spikes.sort();
-    console.log("getIndexOfMax: ", spikes[0]);
+    // console.log("getIndexOfMax: ", spikes[0]);
     return spikes[0];
 }
 
@@ -138,5 +149,31 @@ function getIndexOfMax2(data) {
 }
 
 
-
+function lower(note1, note2) {
+    const value = {
+        "C":1,
+        "D":2,
+        "E":3,
+        "F":4,
+        "G":5,
+        "A":6,
+        "B":7,
+    }
+    if(!(note1 && note2))
+        return 0;
+    const octave1=note1[note1.length-1];
+    const octave2=note2[note2.length-1];
+    if (octave1 < octave2)
+        return 1;
+    if (octave2<octave1)
+        return -1;
+    if (value[note1[0]] < value[note2[0]])
+        return 1;
+    if (value[note2[0]] < value[note1[0]])
+        return -1;
+    // if note 2 has a sharp in it, it is higher
+    if  (note2.length>note1.length)
+        return 1;
+    return -1;
+}
 

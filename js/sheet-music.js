@@ -39,12 +39,32 @@ export function parseMusic(sheetMusic) {
     return song;
 }
 
-// export function getScore(){
-//     const url = 'localhost:3000/music/score/sample';
-//     let score;
-//     $.get(url,function(data,status){
-//        console.log(data);
-//        score = data;
-//     });
-//     return score;
-// }
+export async function getScore() {
+    const url = 'http://localhost:3000/score/sample';
+
+    return await $.ajax({
+        url: url,
+        type: 'GET',
+        success: function (res) {
+            return res;
+        },
+        error: function (xhr, status, error) {
+            console.log(error);
+        }
+
+    });
+}
+
+
+
+export function readFile(input) {
+    let file = input.files[0];
+    let reader = new FileReader();
+    reader.readAsText(file);
+    reader.onload = function () {
+        loadMusic(reader.result);
+    };
+    reader.onerror = function () {
+        console.log(reader.error);
+    };
+}
