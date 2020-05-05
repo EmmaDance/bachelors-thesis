@@ -30,11 +30,11 @@ export function parseMusic(sheetMusic) {
             octave = pitch.childNodes[3].childNodes[0].nodeValue;
             note += step;
             note += octave;
-            console.log(note);
+            // console.log(note);
             song.push(note);
         }
         duration = notes[i].childNodes[3].childNodes[0].nodeValue;
-        console.log(duration);
+        // console.log(duration);
     }
     return song;
 }

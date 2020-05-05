@@ -12,119 +12,118 @@
 </head>
 <body>
 <div id="page-container">
-<header>
-    <section id="header-container">
-        <h1 id="title">master <em>MUSIC </em></h1>
-        <img id="logo" src="assets/logo.png">
-    </section>
-</header>
-<main>
-    <section id="initialize">
-        <div class="card border-dark text-center">
-            <div class="card-body">
-                <h2 class="card-title">Get Started!</h2>
-                <p class="card-text">Upload a sheet music file to get started! Currently supported format: *.musicxml. </p>
-                <!--                <button id="upload" type="button" class="btn btn-outline-dark"><h4>Upload <i class="fa fa-upload"></i></h4></button>-->
+    <header>
+        <section id="header-container">
+            <h1 id="title">master <em>MUSIC </em></h1>
+            <img id="logo" src="assets/logo.png">
+        </section>
+    </header>
+    <main>
+        <section id="initialize">
+            <div class="card border-dark text-center">
+                <div class="card-body">
+                    <h2 class="card-title">Get Started!</h2>
+                    <p class="card-text">Upload a sheet music file to get started! Currently supported format:
+                        *.musicxml. </p>
                     <form id="upload-form">
-                    <input id="file-input" name="file-input" type="file" accept=".musicxml">
-
-                        <button id="upload-btn" class="btn btn-outline-dark" >
+                        <input id="file-input" name="file-input" type="file" accept=".musicxml">
+                        <button id="upload-btn" class="btn btn-outline-dark">
                             <h4>Upload <i class="fa fa-upload"></i></h4>
                         </button>
-                </form>
-<!--                <form action="/file-upload"-->
-<!--                      class="dropzone"-->
-<!--                      id="uploaddropzone"></form>-->
+                    </form>
+                </div>
+                <div class="card-footer text-muted">
+                    Or load a sample sheet music from <a href="#" id="get-sample">here</a>.
+                </div>
+            </div>
+        </section>
+        <section id="navigation">
+            <nav>
+                <div class="nav nav-fill nav-tabs" id="nav-tab" role="tablist">
+                    <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#nav-home" role="tab"
+                       aria-controls="nav-home" aria-selected="true">Listen</a>
+                    <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#nav-profile" role="tab"
+                       aria-controls="nav-profile" aria-selected="false">Learn the Melody</a>
+                    <a class="nav-item nav-link" id="nav-contact-tab" data-toggle="tab" href="#nav-contact" role="tab"
+                       aria-controls="nav-contact" aria-selected="false">Master it</a>
+                </div>
+            </nav>
+        </section>
+        <section id="pages">
+            <div class="tab-content" id="nav-tabContent">
+                <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
+                    <!-- page LISTEN -->
+                    <section class="page" id="page-listen">
+                        <!--  <h2 class="page-title">Listen</h2>-->
+                        <article id="audio-player">
+                            <div class="controls">
+                                <button class="btn btn-outline-light" id="btn-play"><i class="fa fa-play"></i></button>
+                                <button class="btn btn-outline-light" id="btn-pause"><i class="fa fa-pause"></i>
+                                </button>
+                                <button class="btn btn-outline-light" id="btn-stop"><i class="fa fa-stop"></i></button>
+                            </div>
+                        </article>
+                    </section>
+                </div>
+                <!--   page LEARN -->
+                <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
+                    <section class="page" id="page-learn">
+                        <!--     <h2 class="page-title">Learn the Melody</h2>-->
+                        <article id="notes">
+                            <h3 id="init-song"></h3>
+                            <h3 id="crt-song"></h3>
+                            <h1 id="note">-</h1>
+                            <h1><i id="up" class="fa fa-arrow-up"></i></h1>
+                            <h1><i id="correct" class="fa fa-check"></i></h1>
+                            <h1><i id="down" class="fa fa-arrow-down"></i></h1>
+                        </article>
+                        <article id="control-buttons">
+                            <button id="start" type="button" class="btn btn-outline-light"><h2>Start</h2></button>
+                            <button id="stop" type="button" class="btn btn-outline-dark"><h2>Stop</h2></button>
+                        </article>
+                        <article id="visualizer">
+                            <canvas id="canvas" width="300" height="100"></canvas>
+                        </article>
+                        <h1 id="congrats"> Congratulations! You sang the whole song!</h1>
+                    </section>
+                    <section id="kb">
+                        <h6>Help yourself! Get the reference notes when you are stuck.</h6>
+                        <div id="keyboard" class="keyboard-holder"></div>
+                    </section>
+                </div>
+                <!--  page MASTER -->
+                <div class="tab-pane fade" id="nav-contact" role="tabpanel" aria-labelledby="nav-contact-tab">
+                    <section class="page" id="page-master">
+                        <!-- <h2 class="page-title">Master it</h2>-->
+                        <article id="master-controls">
+                            <form name="tempo-form">
+                                <label for="tempoInputId">Tempo</label>
+                                <output name="tempoOutputName" id="tempoOutputId">100</output>
+                                <input type="range" class="custom-range" name="tempoInputName" id="tempoInputId"
+                                       value="100"
+                                       min="40" max="200" oninput="tempoOutputId.value = tempoInputId.value">
+                            </form>
+                            <button id="master-start" type="button" class="btn btn-outline-light"><h2>Start</h2>
+                            </button>
+                            <button id="master-stop" type="button" class="btn btn-outline-dark"><h2>Stop</h2></button>
+                        </article>
+                        <article id="master-sheet-music">
+                            <!--                        <img class="sheet" src="assets/sheet.jpg">-->
+                        </article>
 
+                    </section>
+                </div>
             </div>
-            <div class="card-footer text-muted">
-                Or load a sample sheet music from <a href="#" id="get-sample">here</a>.
-            </div>
-        </div>
-    </section>
-    <section id="navigation">
-        <nav>
-            <div class="nav nav-fill nav-tabs" id="nav-tab" role="tablist">
-                <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#nav-home" role="tab"
-                   aria-controls="nav-home" aria-selected="true">Listen</a>
-                <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#nav-profile" role="tab"
-                   aria-controls="nav-profile" aria-selected="false">Learn the Melody</a>
-                <a class="nav-item nav-link" id="nav-contact-tab" data-toggle="tab" href="#nav-contact" role="tab"
-                   aria-controls="nav-contact" aria-selected="false">Master it</a>
-            </div>
-        </nav>
-    </section>
-    <section id="pages">
-        <div class="tab-content" id="nav-tabContent">
-            <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
-                <!-- page LISTEN -->
-                <section class="page" id="page-listen">
-                    <!--  <h2 class="page-title">Listen</h2>-->
-                    <article id="audio-player">
-                        <div class="controls">
-                            <button class="btn btn-outline-light" id="btn-play"><i class="fa fa-play"></i></button>
-                            <button class="btn btn-outline-light" id="btn-pause"><i class="fa fa-pause"></i></button>
-                            <button class="btn btn-outline-light" id="btn-stop"><i class="fa fa-stop"></i></button>
-                        </div>
-                    </article>
-                </section>
-            </div>
-            <!--   page LEARN -->
-            <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
-                <section class="page" id="page-learn">
-                    <!--                    <h2 class="page-title">Learn the Melody</h2>-->
-                    <article id="notes">
-                        <h3 id="init-song"></h3>
-                        <h3 id="crt-song"></h3>
-                        <h1 id="note">-</h1>
-                    </article>
-                    <article id="control-buttons">
-                        <button id="start" type="button" class="btn btn-outline-light"><h2>Start</h2></button>
-                        <button id="stop" type="button" class="btn btn-outline-dark"><h2>Stop</h2></button>
-                    </article>
-                    <article id="visualizer">
-                        <canvas id="canvas" width="300" height="100"></canvas>
-                    </article>
-                    <h1 id="congrats"> Congratulations! You sang the whole song!</h1>
-                </section>
-                <section id="kb">
-                    <h6>Help yourself! Get the reference notes when you are stuck.</h6>
-                    <div id="keyboard" class="keyboard-holder"></div>
-                </section>
-            </div>
-            <!--  page MASTER -->
-            <div class="tab-pane fade" id="nav-contact" role="tabpanel" aria-labelledby="nav-contact-tab">
-                <section class="page" id="page-master">
-                    <!-- <h2 class="page-title">Master it</h2>-->
+        </section>
+        <article class="sheet-music-display">
+            <div class="sheet" id="score"></div>
+            <!--  <img class="sheet" src="assets/sheet.jpg">-->
+        </article>
 
-                    <article id="master-controls">
-                        <form name="tempo-form">
-                            <label for="tempoInputId">Tempo</label>
-                            <output name="tempoOutputName" id="tempoOutputId">100</output>
-                            <input type="range" class="custom-range" name="tempoInputName" id="tempoInputId" value="100"
-                                   min="40" max="200" oninput="tempoOutputId.value = tempoInputId.value">
-                        </form>
-
-                        <button id="master-start" type="button" class="btn btn-outline-light"><h2>Start</h2></button>
-                        <button id="master-stop" type="button" class="btn btn-outline-dark"><h2>Stop</h2></button>
-                    </article>
-                    <article id="master-sheet-music">
-<!--                        <img class="sheet" src="assets/sheet.jpg">-->
-                    </article>
-
-                </section>
-            </div>
-        </div>
-    </section>
-    <article class="sheet-music-display">
-        <div class="sheet" id="score"></div>
-        <!--  <img class="sheet" src="assets/sheet.jpg">-->
-    </article>
-
-</main>
-<footer>
-    <span>&copy Copyright 2020 Emanuela Dance</span>
-</footer>
+    </main>
+    <footer>
+        <span>&copy Copyright 2020 Emanuela Dance</span>
+    </footer>
 </div>
 <script src="js/jquery-3.4.1.js"></script>
 <script src="index.js"></script>

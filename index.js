@@ -8,6 +8,7 @@ import {parseMusic} from "./js/sheet-music";
 let jquery = require("jquery");
 window.$ = window.jQuery = jquery;
 require("./js/jquery-3.4.1");
+let song = [];
 
 $(document).ready(function () {
     import("./js/playKeyboard").then(function (kb) {
@@ -68,27 +69,28 @@ $(document).ready(function () {
         //     disableCursor: false,
         //     coloringEnabled: true,
         // });
-        let song = parseMusic(sheetMusic);
+        song = parseMusic(sheetMusic);
         let init_song = $("#init-song");
-        let songStr = "";
-        for (let note of song){
-            init_song.append(note + " ");
-            songStr += note;
-            songStr += " ";
-        }
         let osmd = new OpenSheetMusicDisplay(document.getElementById("score"));
         await osmd.load(sheetMusic);
         await osmd.render();
         const audioPlayer = new AudioPlayer();
         await audioPlayer.loadScore(osmd);
-
-        registerButtonEvents(audioPlayer);
-        if (!localStorage.getItem("hasScore")) {
+        if (localStorage.getItem("hasScore")) {
+            init_song.html(localStorage.getItem('song'));
+        } else {
+            let songStr = "";
+            for (let note of song) {
+                init_song.append(note + " ");
+                songStr += note;
+                songStr += " ";
+            }
             localStorage.setItem('score', sheetMusic);
             localStorage.setItem('song', songStr);
             localStorage.setItem('hasScore', 'true');
             renderPage();
         }
+        registerButtonEvents(audioPlayer);
     }
 
     // sheet music
@@ -99,8 +101,6 @@ $(document).ready(function () {
 
     let running = false;
     let crt = 0;
-    let song = localStorage.getItem('songStr');
-
     let crt_song = $("#crt-song");
 
     // Older browsers might not implement mediaDevices at all, so we set an empty object first
@@ -168,6 +168,50 @@ $(document).ready(function () {
         }
     }
 
+    function lower(note1, note2) {
+        if(!(note1 && note2))
+            return 0;
+        console.log("lower: " + note1 + " - " + note2);
+        const octave1=note1[note1.length-1];
+        const octave2=note2[note2.length-1];
+        if (octave1 < octave2)
+            return 1;
+        if (octave2<octave1)
+            return -1;
+        if (note1[0] < note2[0])
+            return 1;
+        if (note2[0] < note1[0])
+            return -1;
+        // if note 2 has a sharp in it, it is higher
+        if  (note2.length>note1.length)
+            return 1;
+        return -1;
+    }
+
+    function correct() {
+        $("#correct").css("color", "green");
+        $("#up").css("color", "whitesmoke");
+        $("#down").css("color", "whitesmoke");
+    }
+
+    function none() {
+        $("#correct").css("color", "whitesmoke");
+        $("#up").css("color", "whitesmoke");
+        $("#down").css("color", "whitesmoke");
+    }
+
+    function up() {
+        $("#correct").css("color", "whitesmoke");
+        $("#up").css("color", "darkred");
+        $("#down").css("color", "whitesmoke");
+    }
+
+    function down() {
+        $("#correct").css("color", "whitesmoke");
+        $("#up").css("color", "whitesmoke");
+        $("#down").css("color", "darkred");
+    }
+
     function start() {
         const HEIGHT = 100;
         const WIDTH = 300;
@@ -179,7 +223,7 @@ $(document).ready(function () {
         const canvasCtx = canvas.getContext('2d');
         canvasCtx.clearRect(0, 0, WIDTH, HEIGHT);
         let len = 0;
-        let note = "";
+        let note = "C0";
 
         let drawVisual;
         const frame = function () {
@@ -195,7 +239,7 @@ $(document).ready(function () {
             //     return;
 
             let e = energy(dataArray);
-            console.log("ENERGY = ", e);
+            // console.log("ENERGY = ", e);
             if (e < 500)
                 return;
 
@@ -203,14 +247,15 @@ $(document).ready(function () {
             let min = indexOfMax * bandSize;
             let max = min + bandSize;
             let frequency = binarySearch(frequencies, min, max);
-            console.log("NEW FRAME");
-            console.log(indexOfMax);
-            console.log(bandSize);
-            console.log(min);
-            console.log(max);
+            // console.log("NEW FRAME");
+            // console.log(indexOfMax);
+            // console.log(bandSize);
+            // console.log(min);
+            // console.log(max);
             console.log(frequency);
             let crtNote = notes[frequency];
             console.log(crtNote);
+            console.log(note);
 
             if (crtNote === note) {
                 len++;
@@ -223,14 +268,24 @@ $(document).ready(function () {
                 note = crtNote;
             }
 
-            // song finished
-            if (crtNote === song[crt]) {
-                crt_song.append(" " + crtNote);
+            console.log("note is "+note);
+            console.log("song[crt] is "+song[crt]);
+            if (note === song[crt]) {
+                correct();
+                crt_song.append(" " + note);
                 crt++;
+                // song finished
                 if (crt >= song.length) {
                     $("#congrats").css("visibility", "visible");
                     stopRecording();
                 }
+            } else if (lower(note, song[crt])===1) {
+                down();
+            } else if (lower(note, song[crt])===-1){
+                up();
+            }
+            else{
+                none();
             }
 
             canvasCtx.fillStyle = 'rgb(255, 255, 255)';

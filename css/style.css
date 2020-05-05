@@ -136,6 +136,11 @@ footer{
 
 /* ------- LEARN page -------- */
 
+#up, #down, #correct{
+    color: whitesmoke;
+}
+
+
 #page-learn{
 
 }

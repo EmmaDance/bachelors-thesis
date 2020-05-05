@@ -44,7 +44,7 @@ export function binarySearch(frequencies, min, max) {
             end = mid - 1;
         }
     }
-    return "idk";
+    return "11";
 }
 
 export function energy(signal) {
