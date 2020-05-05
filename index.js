@@ -1,19 +1,17 @@
 import {binarySearch, energy, getIndexOfMax, mapFrequencies} from "./js/calculator";
+import {OpenSheetMusicDisplay} from "opensheetmusicdisplay";
+import AudioPlayer from "osmd-audio-player";
+import 'regenerator-runtime/runtime'
+import {getSong} from "./js/sheet-music.js";
 
 let jquery = require("jquery");
 window.$ = window.jQuery = jquery;
 require("./js/jquery-3.4.1");
-import {OpenSheetMusicDisplay} from "opensheetmusicdisplay";
-import AudioPlayer from "osmd-audio-player";
-import 'regenerator-runtime/runtime'
-import {getSong} from "./js/sheet-music";
 
 $(document).ready(function () {
     import("./js/playKeyboard").then(function (kb) {
         kb.playKeyboard();
     });
-
-    renderPage();
 
     function renderPage() {
         if (localStorage.getItem("hasScore")) {
@@ -23,6 +21,8 @@ $(document).ready(function () {
             $("#pages").css("display", "inline");
         }
     }
+
+    renderPage();
 
     function readFile(input) {
         let file = input.files[0];
@@ -36,6 +36,28 @@ $(document).ready(function () {
         };
     }
 
+    $('#get-sample').click( async function ()  {
+        let score = await getScore();
+        await loadMusic(score);
+    });
+
+     async function getScore() {
+        const url = 'http://localhost:3000/score/sample';
+
+         return await $.ajax({
+             url: url,
+             type: 'GET',
+             success: function(res) {
+                 return res;
+             },
+             error: function(xhr, status, error) {
+                 console.log(error);
+             }
+
+         });
+
+    }
+
     async function loadMusic(sheetMusic) {
         // let osmd = new OpenSheetMusicDisplay("score", {
         //     autoResize: true,
@@ -47,7 +69,6 @@ $(document).ready(function () {
         //     coloringEnabled: true,
         // });
         let osmd = new OpenSheetMusicDisplay(document.getElementById("score"));
-
         await osmd.load(sheetMusic);
         await osmd.render();
         const audioPlayer = new AudioPlayer();
@@ -66,27 +87,6 @@ $(document).ready(function () {
         let file = document.getElementById('file-input');
         readFile(file);
     });
-
-
-    // // "upload-dropzone" is the camelized version of the HTML element's ID
-    // Dropzone.options.uploaddropzone = {
-    //     paramName: "sheet-music", // The name that will be used to transfer the file
-    //     maxFilesize: 10, // MB
-    //     accept: function(file, done) {
-    //         if (file.name === "justinbieber.jpg") {
-    //             done("Naha, you don't.");
-    //         }
-    //         else {
-    //             alert("The upload was successful!")
-    //             done(); }
-    //     }
-    // };
-    //
-    // Dropzone.options.uploaddropzone = {
-    //     init: function() {
-    //         this.on("addedfile", function(file) { alert("Added file."); });
-    //     }
-    // };
 
     let running = false;
     let song = getSong();
@@ -139,7 +139,7 @@ $(document).ready(function () {
         if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
             console.log('getUserMedia supported.');
             navigator.mediaDevices.getUserMedia(
-                // constraints - only audio needed for this app
+                // constraints - only audio needed for this client
                 {audio: true})
                 // Success callback
                 .then(function (stream) {
@@ -266,3 +266,5 @@ function registerButtonEvents(audioPlayer) {
         }
     });
 }
+
+

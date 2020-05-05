@@ -15,4 +15,12 @@ export function getSong() {
     return newNotes;
 }
 
-
+// export function getScore(){
+//     const url = 'localhost:3000/music/score/sample';
+//     let score;
+//     $.get(url,function(data,status){
+//        console.log(data);
+//        score = data;
+//     });
+//     return score;
+// }

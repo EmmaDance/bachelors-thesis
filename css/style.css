@@ -46,6 +46,18 @@ body {
     /*display: none;*/
 }
 
+#upload-form{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#upload-btn{
+    margin-top: 1rem;
+}
+
+
 #navigation {
     padding: 1rem;
     display: none;
