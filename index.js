@@ -3,6 +3,7 @@ import {OpenSheetMusicDisplay} from "opensheetmusicdisplay";
 import AudioPlayer from "osmd-audio-player";
 import 'regenerator-runtime/runtime'
 import {getSong} from "./js/sheet-music.js";
+import {parseMusic} from "./js/sheet-music";
 
 let jquery = require("jquery");
 window.$ = window.jQuery = jquery;
@@ -36,26 +37,25 @@ $(document).ready(function () {
         };
     }
 
-    $('#get-sample').click( async function ()  {
+    $('#get-sample').click(async function () {
         let score = await getScore();
         await loadMusic(score);
     });
 
-     async function getScore() {
+    async function getScore() {
         const url = 'http://localhost:3000/score/sample';
 
-         return await $.ajax({
-             url: url,
-             type: 'GET',
-             success: function(res) {
-                 return res;
-             },
-             error: function(xhr, status, error) {
-                 console.log(error);
-             }
+        return await $.ajax({
+            url: url,
+            type: 'GET',
+            success: function (res) {
+                return res;
+            },
+            error: function (xhr, status, error) {
+                console.log(error);
+            }
 
-         });
-
+        });
     }
 
     async function loadMusic(sheetMusic) {
@@ -68,6 +68,14 @@ $(document).ready(function () {
         //     disableCursor: false,
         //     coloringEnabled: true,
         // });
+        let song = parseMusic(sheetMusic);
+        let init_song = $("#init-song");
+        let songStr = "";
+        for (let note of song){
+            init_song.append(note + " ");
+            songStr += note;
+            songStr += " ";
+        }
         let osmd = new OpenSheetMusicDisplay(document.getElementById("score"));
         await osmd.load(sheetMusic);
         await osmd.render();
@@ -77,6 +85,7 @@ $(document).ready(function () {
         registerButtonEvents(audioPlayer);
         if (!localStorage.getItem("hasScore")) {
             localStorage.setItem('score', sheetMusic);
+            localStorage.setItem('song', songStr);
             localStorage.setItem('hasScore', 'true');
             renderPage();
         }
@@ -89,11 +98,8 @@ $(document).ready(function () {
     });
 
     let running = false;
-    let song = getSong();
-    let init_song = $("#init-song");
-    for (let note of song)
-        init_song.append(note + " ");
     let crt = 0;
+    let song = localStorage.getItem('songStr');
 
     let crt_song = $("#crt-song");
 
@@ -132,7 +138,6 @@ $(document).ready(function () {
         audioCtx.suspend().then(() => {
             running = false;
         })
-
     }
 
     function startRecording() {
@@ -182,7 +187,6 @@ $(document).ready(function () {
                 drawVisual = requestAnimationFrame(frame);
             analyser.getByteFrequencyData(dataArray);
             analyser.getFloatFrequencyData(fDataArray);
-
 
             // let z = zcr(fDataArray);
             // console.log("ZCR = ", z);
