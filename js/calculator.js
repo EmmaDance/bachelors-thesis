@@ -1,46 +1,3 @@
-
-// Creates two maps
-// notes = a map with pairs (frequency, note)
-// frequencies = a map with pairs (index, frequency)
-export function mapFrequencies(notes, frequencies) {
-    const a = Math.pow(2, 1 / 12);
-    const note_names = ["A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#"];
-    frequencies[57] = 440;
-    notes[440] = "A4";
-    let k = 58;
-    let note = 1;
-    for (let i = 4; i < 9;) {
-        frequencies[k] = frequencies[k - 1] * a;
-        notes[frequencies[k]] = note_names[note] + i.toString();
-        k++;
-        note++;
-        if (note === 3)
-            i++;
-        if (note === 12)
-            note = 0;
-    }
-    k = 56;
-    note = 11;
-    for (let i = 4; i >= 0;) {
-        frequencies[k] = frequencies[k + 1] / a;
-        notes[frequencies[k]] = note_names[note] + i.toString();
-        k--;
-        note--;
-        if (note === 2)
-            i--;
-        if (note < 0)
-            note = 11;
-    }
-
-}
-
-// create map of pairs (note, frequency)
-export function mapNotes(noteMap, notes) {
-    for ( const frequency in notes){
-        noteMap[notes[frequency]] = frequency;
-    }
-}
-
 export function binarySearch(frequencies, min, max) {
     const err = (max-min)*0.2;
     const size = Object.keys(frequencies).length;
@@ -85,13 +42,11 @@ function zcr(signal) {
             zcr++;
         }
     }
-
     return zcr;
-
 }
 
 
-function getMaxAndIndex(data) {
+export function getMaxAndIndex(data) {
     let max, k = 0;
     max = data[0] > data[1] ? data[0] : data[1];
     for (let i = 2; i < data.length; i++) {
@@ -104,22 +59,20 @@ function getMaxAndIndex(data) {
     return {"index": k, "value": data[k]};
 }
 
-function getNMax(data, n) {
+export function getNMax(data, n) {
     let spikes = [];
     for (let i = 0; i < n; i++) {
         let res = getMaxAndIndex(data);
         let idx = res.index;
         data[idx] = -Infinity;
-        // console.log("res = ", res);
-        // let max = res.value;
         spikes.push(idx);
     }
-    // console.log("getNMax: ", spikes);
     return spikes;
 }
 
+// gets the lowest index from the first n maximum points
 export function getIndexOfMax(data) {
-    let spikes = getNMax(data, 2);
+    let spikes = getNMax(data, 4);
     spikes.sort();
     // console.log("getIndexOfMax: ", spikes[0]);
     return spikes[0];
@@ -144,10 +97,8 @@ function getIndexOfMax2(data) {
             k2 = i;
         }
     }
-
     return k1 > k2 ? k2 : k1;
 }
-
 
 function lower(note1, note2) {
     const value = {

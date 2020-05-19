@@ -25,10 +25,7 @@
     "jquery": "3.5.0",
     "jquery-ui-dist": "1.12.1",
     "js": "0.1.0",
-    "koa": "2.11.0",
-    "koa-bodyparser": "4.3.0",
-    "koa-router": "8.0.8",
-    "osmd-audio-player": "^0.1.4",
+    "osmd-audio-player": "0.4.1",
     "popper.js": "1.16.1"
   },
   "devDependencies": {

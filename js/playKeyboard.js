@@ -530,20 +530,20 @@ export function playKeyboard(){
 	var iWhite = 0;
 	var notes = __audioSynth._notes; //C, C#, D....A#, B
 
-	for(let i=-1;i<=1;i++) {
+	for(let i=0;i<=1;i++) {
 		for(var n in notes) {
 			if(n[2]!=='b') {
 				var thisKey = document.createElement('div');
 				if(n.length>1) { //adding sharp sign makes 2 characters
 					thisKey.className = 'black key'; //2 classes
-					thisKey.style.width = '30px';
-					thisKey.style.height = '120px';
-					thisKey.style.left = (40 * (iWhite - 1)) + 25 + 'px';
+					thisKey.style.width = '2rem';
+					thisKey.style.height = '8rem';
+					thisKey.style.left = (3 * (iWhite - 1)) + 2 + 'rem';
 				} else {
 					thisKey.className = 'white key';
-					thisKey.style.width = '40px';
-					thisKey.style.height = '200px';
-					thisKey.style.left = 40 * iWhite + 'px';
+					thisKey.style.width = '3rem';
+					thisKey.style.height = '13rem';
+					thisKey.style.left = 3 * iWhite + 'rem';
 					iWhite++;
 				}
 
@@ -565,7 +565,7 @@ export function playKeyboard(){
 		}
 	}
 
-	visualKeyboard.style.width = iWhite * 40 + 'px';
+	visualKeyboard.style.width = iWhite * 3 + 'rem';
 
 	window.addEventListener(evtListener[1], function() { n = keysPressed.length; while(n--) { fnRemoveKeyBinding({keyCode:keysPressed[n]}); } });
 	

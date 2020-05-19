@@ -5,17 +5,20 @@
     <title>Master music</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/bootstrap.css">
-    <link rel="stylesheet" href="css/dropzone.css">
+    <link rel="stylesheet" href="css/loader.css">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
           integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="https://kit.fontawesome.com/1edc084cdd.js" crossorigin="anonymous"></script>
 </head>
 <body>
 <div id="page-container">
     <header>
         <section id="header-container">
+            <div class="btn btn-outline-light" id="change-music-btn">Change sheet music <i class="fas fa-file-alt"></i></div>
+            <div class="vertical-center">
             <h1 id="title">master <em>MUSIC </em></h1>
             <img id="logo" src="assets/logo.png">
+            </div>
         </section>
     </header>
     <main>
@@ -25,12 +28,11 @@
                     <h2 class="card-title">Get Started!</h2>
                     <p class="card-text">Upload a sheet music file to get started! Currently supported format:
                         *.musicxml. </p>
-                    <form id="upload-form">
+                    <form id="upload-form" enctype=multipart/form-data>
                         <input id="file-input" name="file-input" type="file" accept=".musicxml">
-                        <button id="upload-btn" class="btn btn-outline-dark">
-                            <h4>Upload <i class="fa fa-upload"></i></h4>
-                        </button>
+<!--                        <input id="upload-btn" type="button" class="btn btn-outline-dark" value="Upload">-->
                     </form>
+                    <a class="btn-outline-dark btn" href="#" id="upload-btn"> Upload <i class="fas fa-upload"></i></a>
                 </div>
                 <div class="card-footer text-muted">
                     Or load a sample sheet music from <a href="#" id="get-sample">here</a>.
@@ -69,27 +71,42 @@
                 <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
                     <section class="page" id="page-learn">
                         <!--     <h2 class="page-title">Learn the Melody</h2>-->
-                        <article id="notes">
-                            <h6 id="init-song"></h6>
-                            <h6 id="crt-song"></h6>
-                            <h1 id="note">-</h1>
-                            <h1><i id="up" class="fa fa-arrow-up"></i></h1>
-                            <h1><i id="correct" class="fa fa-check"></i></h1>
-                            <h1><i id="down" class="fa fa-arrow-down"></i></h1>
-                        </article>
-                        <article id="control-buttons">
-                            <button id="start" type="button" class="btn btn-outline-light"><h2>Start</h2></button>
-                            <button id="stop" type="button" class="btn btn-outline-dark"><h2>Stop</h2></button>
-                        </article>
-                        <article id="visualizer">
-                            <canvas id="canvas" width="300" height="100"></canvas>
-                        </article>
-                        <h1 id="congrats"> Congratulations! You sang the whole song!</h1>
+                        <div class="container" id="left">
+                            <article id="notes">
+                                <h6 id="init-song"></h6>
+                                <h6 id="crt-song"></h6>
+                                <h1 id="note">-</h1>
+                            </article>
+                            <div class="row">
+                                <div class="col-9 centered">
+                                    <article id="control-buttons">
+                                        <button id="start" type="button" class="btn btn-outline-light"><h2>Start</h2>
+                                        </button>
+                                        <button id="stop" type="button" class="btn btn-outline-dark"><h2>Stop</h2>
+                                        </button>
+                                    </article>
+                                    <article id="visualizer">
+                                        <canvas id="canvas" width="300" height="100"></canvas>
+                                    </article>
+                                </div>
+                                <div class="col-3">
+                                    <article id="feedback">
+                                        <h1><i id="up" class="fa fa-arrow-up"></i></h1>
+                                        <h1><i id="correct" class="fa fa-check"></i></h1>
+                                        <h1><i id="down" class="fa fa-arrow-down"></i></h1>
+                                    </article>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="right">
+                            <article id="kb">
+                                <h6>Help yourself! Get the reference notes when you are stuck.</h6>
+                                <div id="keyboard" class="keyboard-holder"></div>
+                            </article>
+                        </div>
                     </section>
-                    <section id="kb">
-                        <h6>Help yourself! Get the reference notes when you are stuck.</h6>
-                        <div id="keyboard" class="keyboard-holder"></div>
-                    </section>
+                    <h2 id="congrats"> Congratulations! You sang the whole song!</h2>
+
                 </div>
                 <!--  page MASTER -->
                 <div class="tab-pane fade" id="nav-contact" role="tabpanel" aria-labelledby="nav-contact-tab">
@@ -113,10 +130,13 @@
                     </section>
                 </div>
             </div>
-            <article class="sheet-music-display">
+            <div class="sheet-music-display">
+                <div id="loading-indicator" class="loadingio-spinner-spinner-ld50x36jji"><div class="ldio-58a2xic2hzo">
+                    <div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div>
+                </div></div>
+
                 <div class="sheet" id="score"></div>
-                <!--  <img class="sheet" src="assets/sheet.jpg">-->
-            </article>
+            </div>
         </section>
     </main>
     <footer>

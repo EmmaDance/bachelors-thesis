@@ -1,36 +1,48 @@
-export function getSong() {
-    let notes = "C4 C4 D4 C4 F4 E4 C4 C4 D4 C4 G4 F4 C4 C4 C5 A4 F4 E4 D4 B4 B4 A4 F4 G4 F4";
-    let newNotes = [];
-    let prev = {"A": "G", "B": "A", "C": "B", "D": "C", "E": "D", "F": "E", "G": "F",};
-    let flats = "b";
-    flats = flats.toUpperCase();
-    flats = flats.split(" ");
-    notes = notes.split(" ");
-    for (let note of notes) {
-        if (flats.includes(note[0])) {
-            note = prev[note[0]] + "#" + note[1];
-        }
-        newNotes.push(note);
-    }
-    return newNotes;
-}
+import {OpenSheetMusicDisplay} from "opensheetmusicdisplay";
+import {registerButtonEvents} from "./audio-player";
 
-export function parseMusic(sheetMusic) {
+let song = [];
+// parses the .musicxml file and returns the information needed about the notes: pitch(step and octave) --and duration
+function parseMusic(sheetMusic) {
+    song.clear();
+    console.log("INIT_SHEET_MUSIC");
+    let prev = {
+        "A": "G",
+        "B": "A",
+        "C": "B",
+        "D": "C",
+        "E": "D",
+        "F": "E",
+        "G": "F",
+    }
     const parser = new DOMParser();
     const xmlDoc = parser.parseFromString(sheetMusic, "text/xml");
-    let song = [];
     let notes = xmlDoc.getElementsByTagName("note");
-    let note, pitch, step, octave, duration;
+    let note, pitch, step, alter, octave, duration;
     for (let i = 0; i < notes.length; i += 1) {
-        note='';
+        note = '';
         pitch = notes[i].childNodes[1];
         if (pitch.nodeName === 'rest') {
+
         } else {
-            step = pitch.childNodes[1].childNodes[0].nodeValue;
-            octave = pitch.childNodes[3].childNodes[0].nodeValue;
-            note += step;
-            note += octave;
-            // console.log(note);
+            let pitchChildNodes = pitch.childNodes;
+            for (let i = 0; i < pitchChildNodes.length; i++) {
+                if (pitchChildNodes[i].nodeName === "step") {
+                    step = pitchChildNodes[i].childNodes[0].nodeValue;
+                    note += step;
+                } else if (pitchChildNodes[i].nodeName === "alter") {
+                    alter = pitchChildNodes[i].childNodes[0].nodeValue;
+                    if (alter === '1') {
+                        note += "#";
+                        console.log('#')
+                    } else if (alter === '-1')
+                        note = prev[note] + "#";
+                } else if (pitchChildNodes[i].nodeName === "octave") {
+                    octave = pitchChildNodes[i].childNodes[0].nodeValue;
+                    note += octave;
+
+                }
+            }
             song.push(note);
         }
         duration = notes[i].childNodes[3].childNodes[0].nodeValue;
@@ -39,32 +51,107 @@ export function parseMusic(sheetMusic) {
     return song;
 }
 
-export async function getScore() {
-    const url = 'http://localhost:3000/score/sample';
-
-    return await $.ajax({
-        url: url,
-        type: 'GET',
-        success: function (res) {
-            return res;
-        },
-        error: function (xhr, status, error) {
-            console.log(error);
-        }
-
-    });
-}
-
-
-
-export function readFile(input) {
+// reads a file from a file input and returns its content
+async function readFile(input,audioPlayer) {
     let file = input.files[0];
     let reader = new FileReader();
-    reader.readAsText(file);
+
     reader.onload = function () {
-        loadMusic(reader.result);
+        console.log("onload");
+        $("#loading-indicator").css("visibility", 'hidden');
+        loadMusic(reader.result, audioPlayer).then(
+            () => {
+                renderPage(audioPlayer);
+            }
+        )
+
     };
     reader.onerror = function () {
-        console.log(reader.error);
+        console.log("onerror");
+        console.error(reader.error);
+        $("#loading-indicator").css("visibility", 'hidden');
+
     };
+    reader.onprogress = function () {
+        console.log("onprogress");
+
+        $("#loading-indicator").css("visibility", 'visible');
+
+    }
+    // if (file.type.match(textType)) {
+    // console.log(file.type.match("vnd.recordare.musicxml"));
+    reader.readAsText(file);
 }
+
+
+// renders the score and loads the audio player
+async function loadMusic(sheetMusic, audioPlayer) {
+    console.log('loadMusic');
+    song = parseMusic(sheetMusic);
+    console.log("load music song = ", song);
+    let osmd = new OpenSheetMusicDisplay("score", {
+        autoResize: true,
+        backend: "canvas",
+        drawingParameters: "allon",
+        drawCredits: false,
+        followCursor: true,
+        disableCursor: false,
+        coloringEnabled: true,
+    });
+    $("#loading-indicator").css("visibility", "visible");
+    await osmd.load(sheetMusic);
+    await osmd.render();
+    await audioPlayer.loadScore(osmd);
+    $("#loading-indicator").css("visibility", "hidden");
+
+    if (!(localStorage.getItem("hasScore") === 'true')) {
+        let songStr = "";
+        for (let note of song) {
+            songStr += note;
+            songStr += " ";
+        }
+        writeToLocalStorage(sheetMusic, songStr, true);
+        console.log('saved to local storage');
+
+
+    }
+    registerButtonEvents(audioPlayer);
+    return song;
+}
+
+function writeToLocalStorage(sheetMusic, songStr, hasScore) {
+    localStorage.setItem('score', sheetMusic);
+    localStorage.setItem('song', songStr);
+    localStorage.setItem('hasScore', `${hasScore}`);
+}
+
+function clearLocalStorage() {
+    localStorage.setItem('hasScore', 'false');
+    localStorage.setItem('song', '');
+    localStorage.setItem('score', '');
+}
+
+async function renderPage(audioPlayer) {
+    console.log("render page");
+    if (localStorage.getItem("hasScore") === 'true') {
+        $("#init-song").text(localStorage.getItem("song"));
+        $("#initialize").css("display", "none");
+        $("#navigation").css("display", "inline");
+        $("#pages").css("display", "inline");
+        await Score.loadMusic(localStorage.getItem("score"), audioPlayer);
+    } else {
+        $("#initialize").css("display", "inline");
+        $("#navigation").css("display", "none");
+        $("#pages").css("display", "none");
+    }
+}
+
+export const Score = {
+    parseMusic: parseMusic,
+    readFile: readFile,
+    loadMusic: loadMusic,
+    renderPage: renderPage,
+    clearLocalStorage: clearLocalStorage,
+    song:song,
+}
+// export default song;
