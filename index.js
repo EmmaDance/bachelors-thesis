@@ -87,18 +87,50 @@ $(document).ready(function () {
         UI.none();
     }
 
-    function startMaster() {
-        var allNotes = []
-        osmd.cursor.reset();
-        osmd.cursor.show();
-        const iterator = osmd.cursor.Iterator;
+    (function(deferFunctions) {
+        for (var setter in deferFunctions) (function(setter, clearer) {
+            var ids = [];
+            var startFn = window[setter];
+            var clearFn = window[clearer];
 
+            function clear(id) {
+                var index = ids.indexOf(id);
+                if (index !== -1) ids.splice(index, 1);
+                return clearFn.apply(window, arguments);
+            }
+            function set() {
+                var id = startFn.apply(window, arguments);
+                ids.push(id);
+                return id;
+            }
+            set.clearAll = function() { ids.slice(0).forEach(clear); };
+
+            if (startFn && clearFn) {
+                window[setter] = set;
+                window[clearer] = clear;
+            }
+        })(setter, deferFunctions[setter]);
+    })(
+        { setTimeout: 'clearTimeout'
+            , setInterval: 'clearInterval'
+            , requestAnimationFrame: 'cancelAnimationFrame'
+        });
+
+    function stopMaster() {
+        // osmd.cursor.reset();
+        // osmd.cursor.hide();
+        window.setTimeout.clearAll();
+    }
+
+    function getDurations(){
+        var allNotes = []
+        const iterator = osmd.cursor.Iterator;
+        const bpm = parseInt($("#tempoOutputId").text());
+        console.log(bpm);
         while (!iterator.EndReached) {
             const voices = iterator.CurrentVoiceEntries;
             const v = voices[0];
             const notes = v.notes;
-            // const bpm = osmd.Sheet.userStartTempoInBPM;
-            const bpm = parseInt($("#tempoOutputId").text());
             for (var j = 0; j < notes.length; j++) {
                 const note = notes[j];
                 if ((note != null)) {
@@ -107,27 +139,29 @@ $(document).ready(function () {
                         "note": note.halfTone + 12, // see issue #224
                         "time": iterator.CurrentSourceTimestamp.RealValue * 4 * 60 / bpm
                     });
-                    console.log(iterator.CurrentSourceTimestamp.RealValue * 4 * 60 / bpm);
                 }
             }
             iterator.moveToNext();
         }
+        return allNotes;
+    }
 
+    function startMaster() {
+        let allNotes = getDurations();
         osmd.cursor.reset();
         osmd.cursor.show();
         let i = 0;
         let oldTime = 0;
         let newTime = allNotes[i].time;
-            window.setTimeout(function run() {
-                i++;
-                if (i>=allNotes.length)
-                    return;
-                osmd.cursor.next();
-                oldTime = allNotes[i-1].time;
-                newTime = allNotes[i].time-oldTime;
-                console.log(newTime);
-                window.setTimeout(run, newTime*1000);
-            }, newTime*1000);
+        window.setTimeout(function run() {
+            osmd.cursor.next();
+            i++;
+            if (i >= allNotes.length)
+                return;
+            oldTime = allNotes[i - 1].time;
+            newTime = allNotes[i].time - oldTime;
+            window.setTimeout(run, newTime * 1000-35);
+        }, newTime * 1000);
     }
 
 // Older browsers might not implement mediaDevices at all, so we set an empty object first
@@ -167,6 +201,11 @@ $(document).ready(function () {
 
     $("#start-master").on("click", function () {
         startMaster();
+    });
+
+
+    $("#stop-master").on("click", function () {
+        stopMaster();
     });
 
     function stopRecording() {
