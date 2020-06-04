@@ -6,13 +6,13 @@ const WIDTH = 300, HEIGHT = 100;
     $("#down").css("color", "whitesmoke");
 }
 
- function up() {
+ function down() {
     $("#correct").css("color", "whitesmoke");
     $("#up").css("color", "darkred");
     $("#down").css("color", "whitesmoke");
 }
 
- function down() {
+ function up() {
     $("#correct").css("color", "whitesmoke");
     $("#up").css("color", "whitesmoke");
     $("#down").css("color", "darkred");

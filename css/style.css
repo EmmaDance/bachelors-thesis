@@ -171,22 +171,45 @@ footer {
     display: flex;
     flex-direction: row;
     justify-content: center;
-    align-items: flex-start;
-}
-
-#note {
-    padding: 0.5rem;
-    text-align: center;
-}
-
-#init-song {
+    align-items: center;
 }
 
 #visualizer {
     padding: 1rem;
+    position: fixed;
+    top:25%;
+    left: 2%;
 }
 
-#start, #stop{
+#control-buttons{
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top:50%;
+    left: 7%;
+}
+
+#feedback{
+    position: fixed;
+    top:49%;
+    left: 17%;
+}
+
+
+#note {
+    padding: 0.5rem;
+    text-align: center;
+    /*visibility: hidden;*/
+}
+
+#notes{
+    display: none;
+}
+
+
+
+
+#start, #stop, #restart{
     margin: 0.5em;
 }
 
@@ -199,6 +222,7 @@ footer {
     visibility: hidden;
     text-align: center;
     display: block;
+    color: white;
 }
 
 #kb {

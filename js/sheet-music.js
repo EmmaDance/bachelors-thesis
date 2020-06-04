@@ -52,16 +52,16 @@ function parseMusic(sheetMusic) {
 }
 
 // reads a file from a file input and returns its content
-async function readFile(input,audioPlayer) {
+async function readFile(input, osmd, audioPlayer) {
     let file = input.files[0];
     let reader = new FileReader();
 
     reader.onload = function () {
         console.log("onload");
         $("#loading-indicator").css("visibility", 'hidden');
-        loadMusic(reader.result, audioPlayer).then(
+        loadMusic(reader.result, osmd, audioPlayer).then(
             () => {
-                renderPage(audioPlayer);
+                renderPage(osmd,audioPlayer);
             }
         )
 
@@ -85,25 +85,24 @@ async function readFile(input,audioPlayer) {
 
 
 // renders the score and loads the audio player
-async function loadMusic(sheetMusic, audioPlayer) {
+async function loadMusic(sheetMusic, osmd, audioPlayer) {
     console.log('loadMusic');
     song = parseMusic(sheetMusic);
     console.log("load music song = ", song);
-    let osmd = new OpenSheetMusicDisplay("score", {
-        autoResize: true,
-        backend: "canvas",
-        drawingParameters: "allon",
-        drawCredits: false,
-        followCursor: true,
-        disableCursor: false,
-        coloringEnabled: true,
-    });
+
     $("#loading-indicator").css("visibility", "visible");
     await osmd.load(sheetMusic);
     await osmd.render();
+
     await audioPlayer.loadScore(osmd);
     $("#loading-indicator").css("visibility", "hidden");
-
+    $("#showCursor").on("click",function () {
+        if (osmd.cursor) {
+            osmd.cursor.show();
+        } else {
+            console.log("Can't show cursor, as it was disabled (e.g. by drawingParameters).");
+        }
+    });
     if (!(localStorage.getItem("hasScore") === 'true')) {
         let songStr = "";
         for (let note of song) {
@@ -131,14 +130,14 @@ function clearLocalStorage() {
     localStorage.setItem('score', '');
 }
 
-async function renderPage(audioPlayer) {
+async function renderPage(osmd, audioPlayer) {
     console.log("render page");
     if (localStorage.getItem("hasScore") === 'true') {
         $("#init-song").text(localStorage.getItem("song"));
         $("#initialize").css("display", "none");
         $("#navigation").css("display", "inline");
         $("#pages").css("display", "inline");
-        await Score.loadMusic(localStorage.getItem("score"), audioPlayer);
+        await Score.loadMusic(localStorage.getItem("score"), osmd, audioPlayer);
     } else {
         $("#initialize").css("display", "inline");
         $("#navigation").css("display", "none");

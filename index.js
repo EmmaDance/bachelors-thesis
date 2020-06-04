@@ -6,14 +6,54 @@ import {UI} from "./js/ui";
 import {Tests} from "./js/tests";
 import {Music} from "./js/music";
 import AudioPlayer from "osmd-audio-player";
+import {OpenSheetMusicDisplay} from "opensheetmusicdisplay";
+import {PlaybackEvent} from "osmd-audio-player/src/PlaybackEngine";
 
 let jquery = require("jquery");
 window.$ = window.jQuery = jquery;
 require("./js/jquery-3.4.1");
 Tests.runAllTests();
 Music.init();
+let pos = 0;
+let measure = 0;
 
 $(document).ready(function () {
+// Create OSMD object and canvas
+    let osmd = new OpenSheetMusicDisplay("score", {
+        autoResize: true,
+        backend: "svg",
+        disableCursor: false,
+        drawingParameters: "compact", // try compact (instead of default)
+        drawPartNames: true, // try false
+        // drawTitle: false,
+        // drawSubtitle: false,
+        drawFingerings: true,
+        fingeringPosition: "left", // left is default. try right. experimental: auto, above, below.
+        // fingeringInsideStafflines: "true", // default: false. true draws fingerings directly above/below notes
+        setWantedStemDirectionByXml: true, // try false, which was previously the default behavior
+        // drawUpToMeasureNumber: 3, // draws only up to measure 3, meaning it draws measure 1 to 3 of the piece.
+
+        //drawMeasureNumbers: false, // disable drawing measure numbers
+        //measureNumberInterval: 4, // draw measure numbers only every 4 bars (and at the beginning of a new system)
+
+        // coloring options
+        coloringEnabled: true,
+        defaultColorNotehead: "teal", // try setting a default color. default is black (undefined)
+        defaultColorStem: "#106d85",
+
+        autoBeam: false, // try true, OSMD Function Test AutoBeam sample
+        autoBeamOptions: {
+            beam_rests: false,
+            beam_middle_rests_only: false,
+            //groups: [[3,4], [1,1]],
+            maintain_stem_directions: false
+        },
+
+        // tupletsBracketed: true, // creates brackets for all tuplets except triplets, even when not set by xml
+        // tripletsBracketed: true,
+        // tupletsRatioed: true, // unconventional; renders ratios for tuplets (3:2 instead of 3 for triplets)
+    });
+    osmd.setLogLevel('debug'); // set this to 'debug' if you want to see more detailed control flow information in console
 
     import("./js/playKeyboard").then(function (kb) {
         kb.playKeyboard();
@@ -23,28 +63,60 @@ $(document).ready(function () {
     $("#upload-btn").on("click", async function () {
         console.log("upload btn clicked");
         const file = document.getElementById('file-input');
-        await Score.readFile(file,audioPlayer);
+        await Score.readFile(file,osmd, audioPlayer);
     });
 
     $("#change-music-btn").on("click", async function () {
         console.log("Change btn clicked");
         Score.clearLocalStorage();
-        await Score.renderPage(audioPlayer);
+        await Score.renderPage(osmd, audioPlayer);
         reset();
     });
 
     $('#get-sample').click(async function () {
         let score = await Ajax.getScore();
         $("#loading-indicator").css("visibility",'hidden');
-        await Score.loadMusic(score, audioPlayer);
-        await Score.renderPage(audioPlayer);
+        await Score.loadMusic(score, osmd,audioPlayer);
+        await Score.renderPage(osmd, audioPlayer);
     });
 
     function reset(){
         $("#crt-song").text("");
         $("#init-song").text("");
-        $("#congrats").css("display", "none");
+        $("#congrats").css("visibility", "hidden");
         UI.none();
+    }
+
+    function startMaster(){
+        var allNotes = []
+        osmd.cursor.reset();
+        osmd.cursor.show();
+        const iterator = osmd.cursor.Iterator;
+
+        while(!iterator.EndReached){
+            const voices = iterator.CurrentVoiceEntries;
+                const v = voices[0];
+                const notes = v.notes;
+                // const bpm = osmd.Sheet.userStartTempoInBPM;
+                const bpm = 110;
+                for(var j = 0; j < notes.length; j++){
+                    const note = notes[j];
+                    if((note != null)){
+                        console.log(note);
+                        allNotes.push({
+                            "note": note.halfTone+12, // see issue #224
+                            "time": iterator.CurrentSourceTimestamp.RealValue * 4 * 60/bpm
+                        })
+                    }
+                }
+            iterator.moveToNext()
+        }
+
+        for (let crtNote of allNotes){
+            console.log(crtNote.time);
+        }
+
+
     }
 
 // Older browsers might not implement mediaDevices at all, so we set an empty object first
@@ -56,7 +128,7 @@ $(document).ready(function () {
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     // console.log(audioCtx.sampleRate);
     const audioPlayer = new AudioPlayer();
-    Score.renderPage(audioPlayer);
+    Score.renderPage(osmd, audioPlayer);
 
 // const biquadFilter = audioCtx.createBiquadFilter();
 // biquadFilter.type = "lowshelf";
@@ -77,6 +149,13 @@ $(document).ready(function () {
     });
     $("#stop").on("click", function () {
         stopRecording();
+    });
+    $("#restart").on("click", function () {
+        restartRecording();
+    });
+
+    $("#start-master").on("click", function () {
+        startMaster();
     });
 
     function stopRecording() {
@@ -112,7 +191,16 @@ $(document).ready(function () {
         }
     }
 
+    function restartRecording(){
+        startRecording();
+        $("#congrats").css("visibility","hidden");
+        $("#crt-song").text("");
+
+    }
+
     function start() {
+        osmd.cursor.reset();
+        osmd.cursor.show();
         let crt = 0;
         let crt_song = $("#crt-song");
         console.log("start");
@@ -148,42 +236,46 @@ $(document).ready(function () {
                 len++;
                 if (len > 5) {
                     // display the note
-                    $("#note").text(crtNote);
+                    // $("#note").text(crtNote);
+                    console.log("note is "+note);
+                    console.log("song[crt] is "+Score.song[crt]);
+
+                    if (note === Score.song[crt]) {
+                        // osmd.GraphicSheet.MeasureList[0][0].staffEntries[1].graphicalVoiceEntries[0].notes[0].sourceNote.NoteheadColor = "red";
+                        // osmd.render()
+                        osmd.cursor.next();
+                        if (osmd.cursor.NotesUnderCursor()[0].isRest())
+                            osmd.cursor.next();
+                        crt_song.append(" " + note);
+                        len = 1;
+                        crt++;
+                        // song finished
+                        if (crt >= Score.song.length) {
+                            $("#congrats").css("visibility", "visible");
+                            stopRecording();
+                        }
+                    }
+
+                    if(crtNote === Score.song[crt])
+                        UI.correct();
+                    else if(Music.noteMap[crtNote]<Music.noteMap[Score.song[crt]]){
+                        UI.down();
+                    }
+                    else {
+                        UI.up();
+                    }
+
+                    console.log(note);
+                    console.log(Music.noteMap[crtNote]);
+                    console.log(Score.song[crt]);
+                    console.log(Music.noteMap[Score.song[crt]]);
+                    UI.visualize(dataArray, bufferLength);
+
                 }
             } else {
                 len = 1;
                 note = crtNote;
             }
-
-            console.log("note is "+note);
-            console.log("song[crt] is "+Score.song[crt]);
-
-            if (note === Score.song[crt]) {
-                crt_song.append(" " + note);
-                len = 1;
-                crt++;
-                // song finished
-                if (crt >= Score.song.length) {
-                    $("#congrats").css("visibility", "visible");
-                    stopRecording();
-                }
-            }
-
-            if(crtNote === Score.song[crt])
-                UI.correct();
-            else if(Music.noteMap[crtNote]<Music.noteMap[Score.song[crt]]){
-                UI.down();
-            }
-            else {
-                UI.up();
-            }
-
-            console.log(note);
-            console.log(Music.noteMap[crtNote]);
-            console.log(Score.song[crt]);
-            console.log(Music.noteMap[Score.song[crt]]);
-
-            UI.visualize(dataArray, bufferLength);
 
         };
         frame();
