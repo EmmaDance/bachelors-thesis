@@ -152,14 +152,14 @@ $(document).ready(function () {
         osmd.cursor.show();
         let i = 0;
         let oldTime = 0;
-        let newTime = allNotes[i].time;
+        let newTime = allNotes[i+1].time;
         window.setTimeout(function run() {
             osmd.cursor.next();
             i++;
             if (i >= allNotes.length)
                 return;
-            oldTime = allNotes[i - 1].time;
-            newTime = allNotes[i].time - oldTime;
+            oldTime = allNotes[i].time;
+            newTime = allNotes[i+1].time - oldTime;
             window.setTimeout(run, newTime * 1000-35);
         }, newTime * 1000);
     }
