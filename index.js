@@ -6,7 +6,7 @@ import {UI} from "./js/ui";
 import {Tests} from "./js/tests";
 import {Music} from "./js/music";
 import AudioPlayer from "osmd-audio-player";
-import {OpenSheetMusicDisplay} from "opensheetmusicdisplay";
+import {OpenSheetMusicDisplay, PageFormat} from "opensheetmusicdisplay";
 import {PlaybackEvent} from "osmd-audio-player/src/PlaybackEngine";
 
 let jquery = require("jquery");
@@ -40,7 +40,7 @@ $(document).ready(function () {
         coloringEnabled: true,
         defaultColorNotehead: "teal", // try setting a default color. default is black (undefined)
         defaultColorStem: "#106d85",
-
+        pageFormat: PageFormat.Endless,
         autoBeam: false, // try true, OSMD Function Test AutoBeam sample
         autoBeamOptions: {
             beam_rests: false,
@@ -63,7 +63,7 @@ $(document).ready(function () {
     $("#upload-btn").on("click", async function () {
         console.log("upload btn clicked");
         const file = document.getElementById('file-input');
-        await Score.readFile(file,osmd, audioPlayer);
+        await Score.readFile(file, osmd, audioPlayer);
     });
 
     $("#change-music-btn").on("click", async function () {
@@ -75,47 +75,59 @@ $(document).ready(function () {
 
     $('#get-sample').click(async function () {
         let score = await Ajax.getScore();
-        $("#loading-indicator").css("visibility",'hidden');
-        await Score.loadMusic(score, osmd,audioPlayer);
+        $("#loading-indicator").css("visibility", 'hidden');
+        await Score.loadMusic(score, osmd, audioPlayer);
         await Score.renderPage(osmd, audioPlayer);
     });
 
-    function reset(){
+    function reset() {
         $("#crt-song").text("");
         $("#init-song").text("");
         $("#congrats").css("visibility", "hidden");
         UI.none();
     }
 
-    function startMaster(){
+    function startMaster() {
         var allNotes = []
         osmd.cursor.reset();
         osmd.cursor.show();
         const iterator = osmd.cursor.Iterator;
 
-        while(!iterator.EndReached){
+        while (!iterator.EndReached) {
             const voices = iterator.CurrentVoiceEntries;
-                const v = voices[0];
-                const notes = v.notes;
-                // const bpm = osmd.Sheet.userStartTempoInBPM;
-                const bpm = 110;
-                for(var j = 0; j < notes.length; j++){
-                    const note = notes[j];
-                    if((note != null)){
-                        console.log(note);
-                        allNotes.push({
-                            "note": note.halfTone+12, // see issue #224
-                            "time": iterator.CurrentSourceTimestamp.RealValue * 4 * 60/bpm
-                        })
-                    }
+            const v = voices[0];
+            const notes = v.notes;
+            // const bpm = osmd.Sheet.userStartTempoInBPM;
+            const bpm = 110;
+            for (var j = 0; j < notes.length; j++) {
+                const note = notes[j];
+                if ((note != null)) {
+                    // console.log(note);
+                    allNotes.push({
+                        "note": note.halfTone + 12, // see issue #224
+                        "time": iterator.CurrentSourceTimestamp.RealValue * 4 * 60 / bpm
+                    });
+                    console.log(iterator.CurrentSourceTimestamp.RealValue * 4 * 60 / bpm);
                 }
-            iterator.moveToNext()
+            }
+            iterator.moveToNext();
         }
 
-        for (let crtNote of allNotes){
-            console.log(crtNote.time);
-        }
-
+        osmd.cursor.reset();
+        osmd.cursor.show();
+        let i = 0;
+        let oldTime = 0;
+        let newTime = allNotes[i].time;
+            window.setTimeout(function run() {
+                i++;
+                if (i>=allNotes.length)
+                    return;
+                osmd.cursor.next();
+                oldTime = allNotes[i-1].time;
+                newTime = allNotes[i].time-oldTime;
+                console.log(newTime);
+                window.setTimeout(run, newTime*1000);
+            }, newTime*1000);
 
     }
 
@@ -165,6 +177,8 @@ $(document).ready(function () {
     }
 
     function startRecording() {
+        $("#congrats").css("visibility", "hidden");
+        $("#crt-song").text("");
         if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
             console.log('getUserMedia supported.');
             navigator.mediaDevices.getUserMedia(
@@ -191,9 +205,9 @@ $(document).ready(function () {
         }
     }
 
-    function restartRecording(){
+    function restartRecording() {
         startRecording();
-        $("#congrats").css("visibility","hidden");
+        $("#congrats").css("visibility", "hidden");
         $("#crt-song").text("");
 
     }
@@ -204,7 +218,7 @@ $(document).ready(function () {
         let crt = 0;
         let crt_song = $("#crt-song");
         console.log("start");
-        console.log("song = " , Score.song);
+        console.log("song = ", Score.song);
 
         bufferLength = analyser.frequencyBinCount;
         dataArray = new Uint8Array(bufferLength);
@@ -237,15 +251,14 @@ $(document).ready(function () {
                 if (len > 5) {
                     // display the note
                     // $("#note").text(crtNote);
-                    console.log("note is "+note);
-                    console.log("song[crt] is "+Score.song[crt]);
+                    console.log("note is " + note);
+                    console.log("song[crt] is " + Score.song[crt]);
 
                     if (note === Score.song[crt]) {
                         // osmd.GraphicSheet.MeasureList[0][0].staffEntries[1].graphicalVoiceEntries[0].notes[0].sourceNote.NoteheadColor = "red";
                         // osmd.render()
                         osmd.cursor.next();
-                        if (osmd.cursor.NotesUnderCursor()[0].isRest())
-                            osmd.cursor.next();
+
                         crt_song.append(" " + note);
                         len = 1;
                         crt++;
@@ -253,15 +266,19 @@ $(document).ready(function () {
                         if (crt >= Score.song.length) {
                             $("#congrats").css("visibility", "visible");
                             stopRecording();
+                            setTimeout(() => {
+                                $("#congrats").css("visibility", "hidden");
+                            }, 4000);
                         }
+                        if (osmd.cursor.NotesUnderCursor()[0].isRest())
+                            osmd.cursor.next();
                     }
 
-                    if(crtNote === Score.song[crt])
+                    if (crtNote === Score.song[crt])
                         UI.correct();
-                    else if(Music.noteMap[crtNote]<Music.noteMap[Score.song[crt]]){
+                    else if (Music.noteMap[crtNote] < Music.noteMap[Score.song[crt]]) {
                         UI.down();
-                    }
-                    else {
+                    } else {
                         UI.up();
                     }
 
