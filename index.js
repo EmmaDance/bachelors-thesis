@@ -98,7 +98,7 @@ $(document).ready(function () {
             const v = voices[0];
             const notes = v.notes;
             // const bpm = osmd.Sheet.userStartTempoInBPM;
-            const bpm = 110;
+            const bpm = parseInt($("#tempoOutputId").text());
             for (var j = 0; j < notes.length; j++) {
                 const note = notes[j];
                 if ((note != null)) {
@@ -128,7 +128,6 @@ $(document).ready(function () {
                 console.log(newTime);
                 window.setTimeout(run, newTime*1000);
             }, newTime*1000);
-
     }
 
 // Older browsers might not implement mediaDevices at all, so we set an empty object first
