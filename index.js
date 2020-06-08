@@ -1,4 +1,11 @@
-import {binarySearch, energy, getIndexOfMax, mapFrequencies, mapNotes} from "./js/calculator";
+import {
+    binarySearch,
+    energy,
+    getIndexOfLeftmostMaximum,
+    getIndexOfMax,
+    mapFrequencies,
+    mapNotes
+} from "./js/calculator";
 import 'regenerator-runtime/runtime'
 import {Score} from "./js/sheet-music";
 import {Ajax} from "./js/service-utils";
@@ -125,12 +132,13 @@ $(document).ready(function () {
     function getDurations(){
         var allNotes = []
         const iterator = osmd.cursor.Iterator;
-        const bpm = parseInt($("#tempoOutputId").text());
-        console.log(bpm);
         while (!iterator.EndReached) {
             const voices = iterator.CurrentVoiceEntries;
             const v = voices[0];
             const notes = v.notes;
+            // const bpm = osmd.Sheet.userStartTempoInBPM;
+            const bpm = parseInt($("#tempoOutputId").text());
+            console.log(bpm);
             for (var j = 0; j < notes.length; j++) {
                 const note = notes[j];
                 if ((note != null)) {
@@ -147,20 +155,22 @@ $(document).ready(function () {
     }
 
     function startMaster() {
+        let metronome = new Audio("assets/metronome.mp3");
+        metronome.play();
         let allNotes = getDurations();
         osmd.cursor.reset();
         osmd.cursor.show();
-        let i = 0;
+        let i = 1;
         let oldTime = 0;
-        let newTime = allNotes[i+1].time;
+        let newTime = allNotes[i].time;
         window.setTimeout(function run() {
             osmd.cursor.next();
             i++;
             if (i >= allNotes.length)
                 return;
-            oldTime = allNotes[i].time;
-            newTime = allNotes[i+1].time - oldTime;
-            window.setTimeout(run, newTime * 1000-35);
+            oldTime = allNotes[i - 1].time;
+            newTime = allNotes[i].time - oldTime;
+            window.setTimeout(run, newTime * 1000-30);
         }, newTime * 1000);
     }
 
@@ -179,15 +189,23 @@ $(document).ready(function () {
 // biquadFilter.type = "lowshelf";
     const analyser = audioCtx.createAnalyser();
     analyser.smoothingTimeConstant = 0.92;
-    let bufferLength = analyser.frequencyBinCount;
-    console.log(bufferLength);
-    let dataArray = new Uint8Array(bufferLength);
     analyser.fftSize = 4096;
+    let bufferLength = analyser.frequencyBinCount;
+    let dataArray = new Uint8Array(bufferLength);
+    let fDataArray = new Uint8Array(bufferLength);
     const bandSize = audioCtx.sampleRate / analyser.fftSize;
 // Audio Buffer - to access the raw PCM data (in case we need it)
 // let myArrayBuffer = audioCtx.createBuffer(2, audioCtx.sampleRate, audioCtx.sampleRate);
 
     let running = false;
+
+    $("#start-train").on("click", function () {
+        startRecordingTraining();
+    });
+
+    $("#stop-train").on("click", function () {
+        stopRecording();
+    });
 
     $("#start").on("click", function () {
         startRecording();
@@ -202,7 +220,6 @@ $(document).ready(function () {
     $("#start-master").on("click", function () {
         startMaster();
     });
-
 
     $("#stop-master").on("click", function () {
         stopMaster();
@@ -229,9 +246,55 @@ $(document).ready(function () {
                     audioCtx.resume().then(() => {
                         const microphone = audioCtx.createMediaStreamSource(stream);
                         microphone.connect(analyser);
+                        start();
+                    });
+                })
+                // Error callback
+                .catch(function (err) {
+                    console.log('The following getUserMedia error occurred: ' + err);
+                });
+        } else {
+            console.log('getUserMedia not supported on your browser!');
+        }
+    }
+
+    function startRecordingTraining() {
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            navigator.mediaDevices.getUserMedia(
+                {audio: true})
+                .then(function (stream) {
+                    console.log("Success");
+                    running = true;
+                    audioCtx.resume().then(() => {
+                        const microphone = audioCtx.createMediaStreamSource(stream);
+                        microphone.connect(analyser);
+                        startT();
+                    });
+                })
+                .catch(function (err) {
+                    console.log('The following getUserMedia error occurred: ' + err);
+                });
+        } else {
+            console.log('getUserMedia not supported on your browser!');
+        }
+    }
+
+    function startMasterRecording(){
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            console.log('getUserMedia supported.');
+            navigator.mediaDevices.getUserMedia(
+                // constraints - only audio needed for this client
+                {audio: true})
+                // Success callback
+                .then(function (stream) {
+                    console.log("Success");
+                    running = true;
+                    audioCtx.resume().then(() => {
+                        const microphone = audioCtx.createMediaStreamSource(stream);
+                        microphone.connect(analyser);
                         // microphone.connect(biquadFilter);
                         // biquadFilter.connect(analyser);
-                        start();
+                        startM();
                     });
                 })
                 // Error callback
@@ -250,6 +313,34 @@ $(document).ready(function () {
 
     }
 
+    function startM(){
+        bufferLength = analyser.frequencyBinCount;
+        dataArray = new Uint8Array(bufferLength);
+        fDataArray = new Float32Array(bufferLength);
+        UI.initVisualizerFrequency();
+        analyser.getFloatFrequencyData(fDataArray);
+        analyser.getByteFrequencyData(dataArray);
+        let crt = 0;
+        let e = energy(dataArray);
+        if (e < 500)
+            return;
+
+        let indexOfMax = getIndexOfMax(fDataArray);
+        let min = indexOfMax * bandSize;
+        let max = min + bandSize;
+        let frequency = binarySearch(Music.frequencies, min, max);
+        console.log(frequency);
+        let crtNote = Music.notes[frequency];
+
+        if (crtNote === Score.song[crt])
+            UI.correct();
+        else if (Music.noteMap[crtNote] < Music.noteMap[Score.song[crt]]) {
+            UI.down();
+        } else {
+            UI.up();
+        }
+    }
+
     function start() {
         osmd.cursor.reset();
         osmd.cursor.show();
@@ -262,7 +353,7 @@ $(document).ready(function () {
         dataArray = new Uint8Array(bufferLength);
         const fDataArray = new Float32Array(bufferLength);
 
-        UI.initVisualizer();
+        UI.initVisualizerFrequency();
         let len = 0;
         let note = "C0";
 
@@ -277,11 +368,14 @@ $(document).ready(function () {
             if (e < 500)
                 return;
 
-            let indexOfMax = getIndexOfMax(fDataArray);
+            let indexOfMax0 = getIndexOfMax(fDataArray);
+            let indexOfMax = getIndexOfLeftmostMaximum(fDataArray);
             let min = indexOfMax * bandSize;
             let max = min + bandSize;
             let frequency = binarySearch(Music.frequencies, min, max);
-            console.log(frequency);
+            console.log(indexOfMax0);
+            console.log("index of max is ",indexOfMax);
+            console.log("frequency is ",frequency);
             let crtNote = Music.notes[frequency];
 
             if (crtNote === note) {
@@ -324,7 +418,7 @@ $(document).ready(function () {
                     console.log(Music.noteMap[crtNote]);
                     console.log(Score.song[crt]);
                     console.log(Music.noteMap[Score.song[crt]]);
-                    UI.visualize(dataArray, bufferLength);
+                    UI.visualize_frequency(dataArray, indexOfMax);
 
                 }
             } else {
@@ -333,6 +427,31 @@ $(document).ready(function () {
             }
 
         };
+        frame();
+    }
+
+    function startT() {
+        console.log("startT");
+        bufferLength = analyser.frequencyBinCount;
+        dataArray = new Uint8Array(bufferLength);
+        fDataArray = new Uint8Array(bufferLength);
+        UI.initVisualizerTime();
+        let drawVisual;
+        const frame = function () {
+            if (running)
+                drawVisual = requestAnimationFrame(frame);
+            analyser.getByteTimeDomainData(dataArray);
+            analyser.getByteFrequencyData(fDataArray);
+            let indexOfMax = getIndexOfMax(fDataArray);
+            let min = indexOfMax * bandSize;
+            let max = min + bandSize;
+            let frequency = binarySearch(Music.frequencies, min, max);
+            console.log(frequency);
+            let crtNote = Music.notes[frequency];
+            $("#note-train").text(crtNote);
+            UI.visualize_time(dataArray);
+            UI.visualize_frequency(fDataArray);
+        }
         frame();
     }
 });

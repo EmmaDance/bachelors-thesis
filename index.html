@@ -43,6 +43,8 @@
         <section id="navigation">
             <nav>
                 <div class="nav nav-fill nav-tabs" id="nav-tab" role="tablist">
+                    <a class="nav-item nav-link" id="nav-train-tab" data-toggle="tab" href="#nav-train" role="tab"
+                       aria-controls="nav-train" aria-selected="false">Train</a>
                     <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#nav-home" role="tab"
                        aria-controls="nav-home" aria-selected="true">Listen</a>
                     <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#nav-profile" role="tab"
@@ -54,6 +56,28 @@
         </section>
         <section id="pages">
             <div class="tab-content" id="nav-tabContent">
+                <div class="tab-pane fade" id="nav-train" role="tabpanel" aria-labelledby="nav-train-tab">
+                    <section class="page" id="page-train">
+                        <article id="controls-train">
+                            <button id="start-train" type="button" class="btn btn-outline-light"><h2>Start</h2></button>
+                            <button id="stop-train" type="button" class="btn btn-outline-light"><h2>Stop</h2></button>
+                        </article>
+                        <article id="visualizer-train">
+                            <article>
+                                <h4>Time domain data visualisation</h4>
+                                <canvas id="canvas-time" width="300" height="100"></canvas>
+                            </article>
+                            <article>
+                                <h4>Note</h4>
+                                <h1 id="note-train">-</h1>
+                            </article>
+                            <article>
+                                <h4>Frequency domain data visualisation</h4>
+                                <canvas id="canvas-frequency" width="300" height="100"></canvas>
+                            </article>
+                        </article>
+                    </section>
+                </div>
                 <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
                     <!-- page LISTEN -->
                     <section class="page" id="page-listen">
@@ -73,7 +97,7 @@
                     <section class="page" id="page-learn">
                         <!--     <h2 class="page-title">Learn the Melody</h2>-->
                         <article id="notes">
-                            <h5>The notes of the song</h5>
+                            <!--                            <h5>The notes of the song</h5>-->
                             <h6 id="init-song"></h6>
                             <h6 id="crt-song"></h6>
                             <h1 id="note">-</h1>
@@ -83,7 +107,7 @@
                             </button>
                             <button id="stop" type="button" class="btn btn-outline-light"><h2>Stop</h2>
                             </button>
-<!--                            <button id="restart" type="button" class="btn btn-outline-light"><h2>Restart</h2></button>-->
+                            <!--                            <button id="restart" type="button" class="btn btn-outline-light"><h2>Restart</h2></button>-->
                         </article>
                         <article id="visualizer">
                             <canvas id="canvas" width="300" height="100"></canvas>
@@ -103,6 +127,7 @@
                 <div class="tab-pane fade" id="nav-contact" role="tabpanel" aria-labelledby="nav-contact-tab">
                     <section class="page" id="page-master">
                         <!-- <h2 class="page-title">Master it</h2>-->
+                        <audio id="metronome" src="assets/metronome.mp3" style="display: none"></audio>
                         <article id="master-controls">
                             <form name="tempo-form">
                                 <label for="tempoInputId">Tempo</label>
@@ -116,7 +141,6 @@
                             <button id="stop-master" type="button" class="btn btn-outline-light"><h2>Stop</h2></button>
                         </article>
                         <article id="master-sheet-music">
-                            <!--     <img class="sheet" src="assets/sheet.jpg">-->
                         </article>
                     </section>
                 </div>

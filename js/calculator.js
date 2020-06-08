@@ -78,28 +78,8 @@ export function getIndexOfMax(data) {
     return spikes[0];
 }
 
-// Get the highest 2 spikes and return the lowest one
-function getIndexOfMax2(data) {
-    let max, smax, k1 = 0, k2 = 0;
-    max = data[0] > data[1] ? data[0] : data[1];
-    smax = data[0] > data[1] ? data[1] : data[0];
-    for (let i = 2; i < data.length; i++) {
-        let val = data[i];
-        if (val > max) {
-            const tmp = max;
-            max = val;
-            smax = tmp;
-            k2 = k1;
-            k1 = i;
 
-        } else if (val > smax) {
-            smax = val;
-            k2 = i;
-        }
-    }
-    return k1 > k2 ? k2 : k1;
-}
-
+// returns -1 if note1 is lower, 0 if they are the same, and 1 if note2 is lower
 function lower(note1, note2) {
     const value = {
         "C":1,
@@ -128,3 +108,29 @@ function lower(note1, note2) {
     return -1;
 }
 
+
+// NEW METHOD: more intuitive
+
+
+function isLocalMaximum(dataArray, x){
+    return dataArray[x]>dataArray[x-1] && dataArray[x]>dataArray[x+1];
+}
+
+
+export function getLocalMaxima(dataArray){
+    let maxima = [];
+    for (let i = 0; i<dataArray.length; i++) {
+        if (isLocalMaximum(dataArray,i)) {
+            maxima.push({"index":i,"value":dataArray[i]});
+        }
+    }
+    return maxima;
+}
+
+export function getIndexOfLeftmostMaximum(dataArray){
+    let maxima = getLocalMaxima(dataArray);
+    maxima.sort((a,b)=>{return b.value - a.value;});
+    maxima = maxima.slice(0,5);
+    maxima.sort((a,b)=>{return a.index - b.index; })
+    return maxima[0].index;
+}
