@@ -2,7 +2,7 @@ import {
     binarySearch,
     energy,
     getIndexOfLeftmostMaximum,
-    getIndexOfMax,
+    getIndexOfMax, getNoteFrequency,
     mapFrequencies,
     mapNotes
 } from "./js/calculator";
@@ -94,8 +94,8 @@ $(document).ready(function () {
         UI.none();
     }
 
-    (function(deferFunctions) {
-        for (var setter in deferFunctions) (function(setter, clearer) {
+    (function (deferFunctions) {
+        for (var setter in deferFunctions) (function (setter, clearer) {
             var ids = [];
             var startFn = window[setter];
             var clearFn = window[clearer];
@@ -105,12 +105,16 @@ $(document).ready(function () {
                 if (index !== -1) ids.splice(index, 1);
                 return clearFn.apply(window, arguments);
             }
+
             function set() {
                 var id = startFn.apply(window, arguments);
                 ids.push(id);
                 return id;
             }
-            set.clearAll = function() { ids.slice(0).forEach(clear); };
+
+            set.clearAll = function () {
+                ids.slice(0).forEach(clear);
+            };
 
             if (startFn && clearFn) {
                 window[setter] = set;
@@ -118,7 +122,8 @@ $(document).ready(function () {
             }
         })(setter, deferFunctions[setter]);
     })(
-        { setTimeout: 'clearTimeout'
+        {
+            setTimeout: 'clearTimeout'
             , setInterval: 'clearInterval'
             , requestAnimationFrame: 'cancelAnimationFrame'
         });
@@ -129,7 +134,8 @@ $(document).ready(function () {
         window.setTimeout.clearAll();
     }
 
-    function getDurations(){
+    // returns a list of objects, each containing the note an its absolute duration, in seconds
+    function getDurations() {
         var allNotes = []
         const iterator = osmd.cursor.Iterator;
         while (!iterator.EndReached) {
@@ -144,7 +150,7 @@ $(document).ready(function () {
                 if ((note != null)) {
                     // console.log(note);
                     allNotes.push({
-                        "note": note.halfTone + 12, // see issue #224
+                        "note": note.halfTone + 12,
                         "time": iterator.CurrentSourceTimestamp.RealValue * 4 * 60 / bpm
                     });
                 }
@@ -170,7 +176,7 @@ $(document).ready(function () {
                 return;
             oldTime = allNotes[i - 1].time;
             newTime = allNotes[i].time - oldTime;
-            window.setTimeout(run, newTime * 1000-30);
+            window.setTimeout(run, newTime * 1000 - 30);
         }, newTime * 1000);
     }
 
@@ -189,7 +195,8 @@ $(document).ready(function () {
 // biquadFilter.type = "lowshelf";
     const analyser = audioCtx.createAnalyser();
     analyser.smoothingTimeConstant = 0.92;
-    analyser.fftSize = 4096;
+    // analyser.fftSize = 4096;
+    analyser.fftSize = 8192;
     let bufferLength = analyser.frequencyBinCount;
     let dataArray = new Uint8Array(bufferLength);
     let fDataArray = new Uint8Array(bufferLength);
@@ -213,9 +220,7 @@ $(document).ready(function () {
     $("#stop").on("click", function () {
         stopRecording();
     });
-    $("#restart").on("click", function () {
-        restartRecording();
-    });
+
 
     $("#start-master").on("click", function () {
         startMaster();
@@ -234,6 +239,7 @@ $(document).ready(function () {
     function startRecording() {
         $("#congrats").css("visibility", "hidden");
         $("#crt-song").text("");
+        UI.none();
         if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
             console.log('getUserMedia supported.');
             navigator.mediaDevices.getUserMedia(
@@ -279,7 +285,7 @@ $(document).ready(function () {
         }
     }
 
-    function startMasterRecording(){
+    function startMasterRecording() {
         if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
             console.log('getUserMedia supported.');
             navigator.mediaDevices.getUserMedia(
@@ -313,7 +319,7 @@ $(document).ready(function () {
 
     }
 
-    function startM(){
+    function startM() {
         bufferLength = analyser.frequencyBinCount;
         dataArray = new Uint8Array(bufferLength);
         fDataArray = new Float32Array(bufferLength);
@@ -325,10 +331,10 @@ $(document).ready(function () {
         if (e < 500)
             return;
 
-        let indexOfMax = getIndexOfMax(fDataArray);
+        let indexOfMax = getIndexOfLeftmostMaximum(fDataArray);
         let min = indexOfMax * bandSize;
         let max = min + bandSize;
-        let frequency = binarySearch(Music.frequencies, min, max);
+        let frequency = binarySearch(Music.frequencies, min, max, 10);
         console.log(frequency);
         let crtNote = Music.notes[frequency];
 
@@ -355,10 +361,12 @@ $(document).ready(function () {
 
         UI.initVisualizerFrequency();
         let len = 0;
-        let note = "C0";
-
+        let note = "-";
+        let songNote = $("#song-note");
+        songNote.text(Score.song[0]);
         let drawVisual;
         const frame = function () {
+            console.log("timestamp: ", Date.now());
             if (running)
                 drawVisual = requestAnimationFrame(frame);
             analyser.getByteFrequencyData(dataArray);
@@ -369,20 +377,22 @@ $(document).ready(function () {
                 return;
 
             let indexOfMax0 = getIndexOfMax(fDataArray);
+            console.log(indexOfMax0);
             let indexOfMax = getIndexOfLeftmostMaximum(fDataArray);
+            console.log("index of max is ", indexOfMax);
             let min = indexOfMax * bandSize;
             let max = min + bandSize;
-            let frequency = binarySearch(Music.frequencies, min, max);
-            console.log(indexOfMax0);
-            console.log("index of max is ",indexOfMax);
-            console.log("frequency is ",frequency);
-            let crtNote = Music.notes[frequency];
+            let frequency = getNoteFrequency(Music.frequencies, min, max, 0);
+            let crtNote = "-";
+            console.log("frequency is ", frequency);
+            if (parseInt(frequency) > 0)
+                crtNote = Music.notes[frequency];
 
             if (crtNote === note) {
                 len++;
-                if (len > 5) {
+                if (len > 4) {
                     // display the note
-                    // $("#note").text(crtNote);
+                    $("#note").text(crtNote);
                     console.log("note is " + note);
                     console.log("song[crt] is " + Score.song[crt]);
 
@@ -390,10 +400,10 @@ $(document).ready(function () {
                         // osmd.GraphicSheet.MeasureList[0][0].staffEntries[1].graphicalVoiceEntries[0].notes[0].sourceNote.NoteheadColor = "red";
                         // osmd.render()
                         osmd.cursor.next();
-
-                        crt_song.append(" " + note);
-                        len = 1;
                         crt++;
+                        len = 1;
+                        crt_song.append(" " + note);
+                        songNote.text(Score.song[crt]);
                         // song finished
                         if (crt >= Score.song.length) {
                             $("#congrats").css("visibility", "visible");
@@ -432,29 +442,54 @@ $(document).ready(function () {
 
     function startT() {
         console.log("startT");
+        let note = "-";
+        let len = 0;
         bufferLength = analyser.frequencyBinCount;
         dataArray = new Uint8Array(bufferLength);
-        fDataArray = new Uint8Array(bufferLength);
+        fDataArray = new Float32Array(bufferLength);
         UI.initVisualizerTime();
         let drawVisual;
         const frame = function () {
             if (running)
                 drawVisual = requestAnimationFrame(frame);
-            analyser.getByteTimeDomainData(dataArray);
-            analyser.getByteFrequencyData(fDataArray);
-            let indexOfMax = getIndexOfMax(fDataArray);
+            analyser.getFloatFrequencyData(fDataArray);
+            let indexOfMax = getIndexOfLeftmostMaximum(fDataArray);
             let min = indexOfMax * bandSize;
             let max = min + bandSize;
-            let frequency = binarySearch(Music.frequencies, min, max);
+            let frequency = getNoteFrequency(Music.frequencies, min, max, 1);
             console.log(frequency);
             let crtNote = Music.notes[frequency];
-            $("#note-train").text(crtNote);
-            UI.visualize_time(dataArray);
-            UI.visualize_frequency(fDataArray);
-        }
-        frame();
+            if (crtNote === note) {
+                len++;
+                if (len > 4) {
+                    // display the note
+                    $("#note-train").text(crtNote);
+                    console.log("note is " + note);
+                    $(".frequency-img").css("display", "none");
+                    let crtVisualiser = $(".undef");
+                    if (crtNote !== undefined) {
+                        console.log("showing " + crtNote)
+                        crtVisualiser = $(document.getElementById(crtNote+"t"));
+                        crtVisualiser.css("display", "block");
+                        crtVisualiser = $(document.getElementById(crtNote));
+                    }
+                    crtVisualiser.css("display", "block");
+                }
+            } else {
+                len = 1;
+                note = crtNote;
+            }
+        analyser.getByteTimeDomainData(dataArray);
+        UI.visualize_time(dataArray);
+        analyser.getByteFrequencyData(dataArray);
+        UI.visualize_frequency(dataArray);
     }
-});
+
+    frame();
+}
+}
+)
+;
 
 
 

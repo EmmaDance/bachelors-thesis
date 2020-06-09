@@ -1,5 +1,7 @@
-export function binarySearch(frequencies, min, max) {
-    const err = (max-min)*0.2;
+export function binarySearch(frequencies, min, max,errorSize) {
+    const err = getErrorSize(max)*errorSize;
+    console.log("error ",err);
+    console.log("interval ",min-err," ",max+err);
     const size = Object.keys(frequencies).length;
     let start = 0, end = size - 1;
     while (start <= end) {
@@ -13,7 +15,20 @@ export function binarySearch(frequencies, min, max) {
             end = mid - 1;
         }
     }
-    return "1";
+    return "-1";
+}
+
+export function getNoteFrequency(frequencies, min, max,errorSize) {
+    let frequency = binarySearch(frequencies,min,max,errorSize);
+    if (frequency < 0){
+        return getNoteFrequency(frequencies,min,max,errorSize+1);
+    }
+    return frequency;
+}
+
+function getErrorSize(frequency){
+    return Math.pow(frequency,1/12);
+
 }
 
 export function energy(signal) {
@@ -72,9 +87,9 @@ export function getNMax(data, n) {
 
 // gets the lowest index from the first n maximum points
 export function getIndexOfMax(data) {
-    let spikes = getNMax(data, 4);
+    let n = 4; // the four spikes with the highest values
+    let spikes = getNMax(data, n);
     spikes.sort();
-    // console.log("getIndexOfMax: ", spikes[0]);
     return spikes[0];
 }
 
@@ -113,11 +128,13 @@ function lower(note1, note2) {
 
 
 function isLocalMaximum(dataArray, x){
+    // return dataArray[x]>dataArray[x-1] && dataArray[x]>dataArray[x+1] && dataArray[x]>dataArray[x+2] && dataArray[x]>dataArray[x-2];
     return dataArray[x]>dataArray[x-1] && dataArray[x]>dataArray[x+1];
 }
 
 
 export function getLocalMaxima(dataArray){
+
     let maxima = [];
     for (let i = 0; i<dataArray.length; i++) {
         if (isLocalMaximum(dataArray,i)) {
@@ -132,5 +149,16 @@ export function getIndexOfLeftmostMaximum(dataArray){
     maxima.sort((a,b)=>{return b.value - a.value;});
     maxima = maxima.slice(0,5);
     maxima.sort((a,b)=>{return a.index - b.index; })
+    for (let i = 0; i < maxima.length-2; i++){
+        // if two close peaks are found, pick the one with the highest value
+        if (maxima[i+1].index-maxima[i].index < 25){
+            if (maxima[i+1].value>maxima[i].value)
+                maxima[i].index = Infinity;
+            else
+                maxima[i+1].index = Infinity;
+        }
+    }
+    maxima.sort((a,b)=>{return a.index - b.index; })
+    console.log(maxima);
     return maxima[0].index;
 }

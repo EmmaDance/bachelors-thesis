@@ -57,7 +57,6 @@ function visualize_frequency(dataArray, indexOfMax) {
 }
 
 function visualize_time(amplitudeArray) {
-    console.log("visualize_time");
     canvasTimeCtx.clearRect(0, 0, WIDTH, HEIGHT);
     for (var i = 0; i < amplitudeArray.length; i++) {
         var value = amplitudeArray[i] / 256;

@@ -108,7 +108,7 @@ main {
     margin: 1em;
 }
 
-#note-train{
+#note-train {
     margin-top: 0.5em;
 }
 
@@ -146,6 +146,37 @@ footer {
 .page-title {
     color: white;
     text-align: center;
+}
+
+.image-stack {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    position: relative;
+}
+
+.image-bottom {
+    grid-column: 1;
+    grid-row: 1;
+}
+
+.image-top {
+    grid-column: 1;
+    grid-row: 1;
+    z-index: 1;
+}
+
+.frequency-img, .frequency-img-base {
+    width: 300px;
+    height: 100px;
+    margin-left: auto;
+    margin-right: auto;
+}
+.frequency-img{
+    display: none;
+}
+
+#frequency-caption {
+    /*margin-top: 6rem;*/
 }
 
 /* ------- LISTEN page -------- */
@@ -214,16 +245,15 @@ footer {
     display: flex;
     flex-direction: column;
     position: fixed;
-    top: 50%;
+    top: 60%;
     left: 7%;
 }
 
 #feedback {
     position: fixed;
-    top: 49%;
+    top: 59%;
     left: 17%;
 }
-
 
 #note {
     padding: 0.5rem;
@@ -232,7 +262,15 @@ footer {
 }
 
 #notes {
-    /*display: none;*/
+    position: fixed;
+    top: 44%;
+    left: 2%;
+    color: whitesmoke;
+}
+
+.note-display {
+    display: flex;
+    align-items: center;
 }
 
 #crt-song, #init-song {
