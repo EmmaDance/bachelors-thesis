@@ -108,18 +108,31 @@ $(document).ready(async function () {
     UI.initButtons(osmd, audioPlayer);
 
     function stopMaster() {
+        window.setTimeout.clearAll();
+        window.setInterval.clearAll();
+        stopRecording();
         // osmd.cursor.reset();
         // osmd.cursor.hide();
-        window.setTimeout.clearAll();
-        stopRecording();
     }
 
     function startCursorMaster() {
-        let metronome = new Audio("assets/metronome.mp3");
-        metronome.play();
         let allNotes = Score.getDurations(osmd);
+        const metronome = document.querySelector('#metronome');
+        let playPromise;
+        const bpm = parseInt($("#tempoOutputId").text());
+        let pause = 60 / bpm * 1000;
+        let k = 0;
+        let num = 3; // rhythm
+        window.setInterval(() => {
+            playPromise = metronome.play();
+            console.log("played ", k);
+            if (k >= num)
+                window.setInterval.clearAll();
+            k++;
+        }, pause);
         osmd.cursor.reset();
         osmd.cursor.show();
+        // console.log(allNotes);
         let i = 1;
         let oldTime = 0;
         let newTime = allNotes[i].time;
@@ -156,7 +169,6 @@ $(document).ready(async function () {
 
     $("#start-master").on("click", function () {
         startRecording(startM);
-        startCursorMaster();
     });
 
     $("#stop-master").on("click", function () {
@@ -197,31 +209,42 @@ $(document).ready(async function () {
         dataArray = new Uint8Array(bufferLength);
         fDataArray = new Float32Array(bufferLength);
         UI.initVisualizerFrequency('canvas-master');
+        startCursorMaster();
         let crt = 0;
         let ok = false;
         let progressBar = $(".progress-bar");
         let songLength = Score.song.length
-        progressBar.attr('ariavalue-max',songLength)
+        progressBar.attr('ariavalue-max', songLength);
+        progressBar.attr('aria-valuenow', 0);
         // on event cursor:next
         $(document).on("cursor:next", function () {
             console.log("On cursor next");
-            if (ok)
+            let isRest = osmd.cursor.NotesUnderCursor()[0].isRest();
+            if (isRest) {
+                ok = true;
+                console.log("break");
+            }
+            if (ok) {
                 makeProgress();
+                console.log(Score.song[crt]);
+            }
+            if (!isRest) {
+                crt++;
+            }
             ok = false;
-            crt++;
         });
         var i = 0;
 
         function makeProgress() {
             if (i < songLength) {
                 i = i + 1;
-                progressBar.css("width", i*100/songLength + "%").text(i*100/songLength+"%");
+                progressBar.css("width", i * 100 / songLength + "%").text(Math.round(i * 100 / songLength) + "%");
             }
         }
 
         let drawVisual;
         const frame = function () {
-            console.log("timestamp: ", Date.now());
+            // console.log("timestamp: ", Date.now());
             if (running)
                 drawVisual = requestAnimationFrame(frame);
             analyser.getFloatFrequencyData(fDataArray);
@@ -230,7 +253,7 @@ $(document).ready(async function () {
             let min = indexOfMax * bandSize;
             let max = min + bandSize;
             let frequency = getNoteFrequency(Music.frequencies, min, max, 1);
-            console.log(frequency);
+            // console.log(frequency);
             let crtNote = Music.notes[frequency];
             if (crtNote === Score.song[crt]) {
                 ok = true;

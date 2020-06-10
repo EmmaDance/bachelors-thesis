@@ -238,7 +238,7 @@ footer {
     left: 12%;
 }
 
-#control-buttons {
+.control-buttons {
     display: flex;
     flex-direction: column;
     position: fixed;

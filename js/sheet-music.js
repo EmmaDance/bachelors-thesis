@@ -146,16 +146,15 @@ async function renderPage(osmd, audioPlayer) {
     }
 }
 
-// returns a list of objects, each containing the note an its absolute duration, in seconds
+// returns a list of objects, each containing the note and the time when it starts to be played, in seconds
 function getDurations(osmd) {
     var allNotes = []
     const iterator = osmd.cursor.Iterator;
+    const bpm = parseInt($("#tempoOutputId").text());
     while (!iterator.EndReached) {
         const voices = iterator.CurrentVoiceEntries;
         const v = voices[0];
         const notes = v.notes;
-        const bpm = parseInt($("#tempoOutputId").text());
-        console.log(bpm);
         for (var j = 0; j < notes.length; j++) {
             const note = notes[j];
             if ((note != null)) {
@@ -167,6 +166,10 @@ function getDurations(osmd) {
         }
         iterator.moveToNext();
     }
+    allNotes.push({
+        "note": 0,
+        "time": iterator.CurrentSourceTimestamp.RealValue * 4 * 60 / bpm
+    });
     return allNotes;
 }
 

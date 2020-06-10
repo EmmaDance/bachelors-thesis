@@ -8,7 +8,7 @@ const WIDTH = 300, HEIGHT = 100;
 function correct() {
     $(".correct").css("color", "green");
     $(".up").css("color", "whitesmoke");
-    $("#.down").css("color", "whitesmoke");
+    $(".down").css("color", "whitesmoke");
 }
 
 function down() {
