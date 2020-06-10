@@ -44,7 +44,7 @@
             <nav>
                 <div class="nav nav-fill nav-tabs" id="nav-tab" role="tablist">
                     <a class="nav-item nav-link" id="nav-train-tab" data-toggle="tab" href="#nav-train" role="tab"
-                       aria-controls="nav-train" aria-selected="false">Train</a>
+                       aria-controls="nav-train" aria-selected="false">Training</a>
                     <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#nav-home" role="tab"
                        aria-controls="nav-home" aria-selected="true">Listen</a>
                     <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#nav-profile" role="tab"
@@ -105,7 +105,7 @@
                             </article>
                             <article>
                                 <h4>Frequency domain data visualisation</h4>
-                                <canvas id="canvas-frequency" width="300" height="100"></canvas>
+                                <canvas id="canvas-train" width="300" height="100"></canvas>
                                 <h4 id="frequency-caption">Reference frequency spectrum</h4>
                                 <div class="image-stack">
                                     <div class="image-bottom">
@@ -153,7 +153,7 @@
                                 <button class="btn btn-outline-light" id="btn-stop"><i class="fa fa-stop"></i></button>
                             </div>
                         </article>
-                        <article>
+                        <article id="listen-info">
                             <h4>Current note</h4>
                             <h1 id="note-listen">-</h1>
                         </article>
@@ -201,7 +201,7 @@
                     <section class="page" id="page-master">
                         <!-- <h2 class="page-title">Master it</h2>-->
                         <audio id="metronome" src="assets/m.mp3" style="display: none"></audio>
-                        <div class="progress">
+                        <div id="master-progress" class="progress">
                             <div class="progress-bar bg-success progress-bar-striped" style="min-width: 1px;"></div>
                         </div>
                         <article id="master-controls">
@@ -212,14 +212,14 @@
                                        value="80"
                                        min="40" max="150" oninput="tempoOutputId.value = tempoInputId.value">
                             </form>
-                            <article class="control-buttons">
+                            <article class="master-buttons">
                             <button id="start-master" type="button" class="btn btn-outline-light"><h2>Start</h2>
                             </button>
                             <button id="stop-master" type="button" class="btn btn-outline-light"><h2>Stop</h2></button>
                             </article>
                         </article>
                         <canvas id="canvas-master" width="300" height="100"></canvas>
-                        <article class="feedback">
+                        <article class="feedback-master">
                             <h1 class="up"><i class="fa fa-arrow-up"></i></h1>
                             <h1  class="correct"><i class="fa fa-check"></i></h1>
                             <h1 class="down"><i class="fa fa-arrow-down"></i></h1>

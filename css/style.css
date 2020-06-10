@@ -112,7 +112,7 @@ main {
     margin-top: 0.5em;
 }
 
-#canvas-time, #canvas-frequency, #canvas-master {
+#canvas-time, #canvas-train, #canvas-master {
     margin-left: auto;
     margin-right: auto;
     display: block;
@@ -134,15 +134,22 @@ footer {
 
 .page {
     padding: 1rem;
-    display: flex;
-    flex-direction: column;
-    /*align-items: center;*/
+
 }
 
 .page-title {
     color: white;
     text-align: center;
 }
+
+/*PAGE TRAIN*/
+
+#page-train{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
 
 .image-stack {
     display: grid;
@@ -206,6 +213,16 @@ footer {
 
 #audio-player {
     padding: 1rem;
+    position: fixed;
+    top: 35%;
+    left:15%;
+}
+
+#listen-info{
+    position: fixed;
+    top: 45%;
+    left:16%;
+    color: white;
 }
 
 /* ------- LEARN page -------- */
@@ -275,7 +292,7 @@ footer {
 }
 
 
-#start, #stop, #restart {
+#start, #stop {
     margin: 0.5em;
 }
 
@@ -300,7 +317,40 @@ footer {
 #master-controls {
     text-align: center;
     padding: 1rem;
+    position: fixed;
+    top: 12rem;
+    left: 12rem;
 }
+
+#canvas-master{
+    position: fixed;
+    top: 18rem;
+    left: 10rem;
+}
+
+.master-buttons{
+    position: fixed;
+    top: 28rem;
+    left: 10rem;
+}
+
+#start-master, #stop-master{
+    margin: 0.5em;
+}
+
+.feedback-master{
+    position: fixed;
+    top: 26rem;
+    left: 25rem;
+}
+
+#master-progress{
+    position: fixed;
+    top: 38rem;
+    left: 5rem;
+    width: 30%;
+}
+
 
 input[type=range]::-webkit-slider-thumb {
     background: #0c5460;
