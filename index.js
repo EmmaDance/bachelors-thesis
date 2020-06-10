@@ -15,6 +15,7 @@ import {getNoteFromMidi, Music} from "./js/music";
 import AudioPlayer from "osmd-audio-player";
 import {OpenSheetMusicDisplay, PageFormat} from "opensheetmusicdisplay";
 import {PlaybackEvent} from "osmd-audio-player/src/PlaybackEngine";
+import { GraphicalNote } from 'opensheetmusicdisplay';
 
 let jquery = require("jquery");
 window.$ = window.jQuery = jquery;
@@ -122,7 +123,7 @@ $(document).ready(async function () {
         const bpm = parseInt($("#tempoOutputId").text());
         let pause = 60 / bpm * 1000;
         let k = 0;
-        let num = 3; // rhythm
+        let num = 4 // rhythm
         window.setInterval(() => {
             playPromise = metronome.play();
             console.log("played ", k);
@@ -130,23 +131,26 @@ $(document).ready(async function () {
                 window.setInterval.clearAll();
             k++;
         }, pause);
-        osmd.cursor.reset();
-        osmd.cursor.show();
-        // console.log(allNotes);
-        let i = 1;
-        let oldTime = 0;
-        let newTime = allNotes[i].time;
-        window.setTimeout(function run() {
-            osmd.cursor.next();
-            // trigger event
-            $(document).trigger("cursor:next");
-            i++;
-            if (i >= allNotes.length)
-                return;
-            oldTime = allNotes[i - 1].time;
-            newTime = allNotes[i].time - oldTime;
-            window.setTimeout(run, newTime * 1000 - 30);
-        }, newTime * 1000);
+        window.setTimeout(()=>{
+            osmd.cursor.reset();
+            osmd.cursor.show();
+            // console.log(allNotes);
+            let i = 1;
+            let oldTime = 0;
+            let newTime = allNotes[i].time;
+            window.setTimeout(function run() {
+                osmd.cursor.next();
+                // trigger event
+                $(document).trigger("cursor:next");
+                i++;
+                if (i >= allNotes.length)
+                    return;
+                oldTime = allNotes[i - 1].time;
+                newTime = allNotes[i].time - oldTime;
+                window.setTimeout(run, newTime * 1000 - 30);
+            }, newTime * 1000);
+        },pause*(num+1));
+
     }
 
     $("#start-train").on("click", function () {
@@ -205,6 +209,7 @@ $(document).ready(async function () {
     }
 
     function startM() {
+        // osmd.setOptions({renderSingleHorizontalStaffline: true});
         bufferLength = analyser.frequencyBinCount;
         dataArray = new Uint8Array(bufferLength);
         fDataArray = new Float32Array(bufferLength);
@@ -219,6 +224,10 @@ $(document).ready(async function () {
         // on event cursor:next
         $(document).on("cursor:next", function () {
             console.log("On cursor next");
+            if (crt === Score.song.length-1){
+                stopMaster();
+                osmd.render();
+            }
             let isRest = osmd.cursor.NotesUnderCursor()[0].isRest();
             if (isRest) {
                 ok = true;
@@ -226,8 +235,19 @@ $(document).ready(async function () {
             }
             if (ok) {
                 makeProgress();
+                // let a = osmd.cursor.Iterator.CurrentMeasure.VerticalMeasureList[0];
+                // let b = a.StaffEntries[0];
+                // let c = b.graphicalVoiceEntries[0];
+                // let d = c.notes[0];
+                // let e = d.vfnote[0];
+                // e.color = "#565656";
+                osmd.cursor.NotesUnderCursor()[0].NoteheadColor = "#07ba0d";
                 console.log(Score.song[crt]);
             }
+            else{
+                osmd.cursor.NotesUnderCursor()[0].NoteheadColor = "#d12008";
+            }
+
             if (!isRest) {
                 crt++;
             }
