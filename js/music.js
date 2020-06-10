@@ -1,6 +1,17 @@
+// map (index, frequency)
 let frequencies = {};
+
+// map (frequency, note)
 let notes = {};
+
+//map (note, frequency)
 let noteMap = {};
+
+export function getNoteFromMidi(number) {
+    if (number === 0)
+        return "-";
+    return notes[frequencies[number]];
+}
 
 // Creates two maps
 // notes = a map with pairs (frequency, note)

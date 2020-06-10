@@ -132,10 +132,6 @@ footer {
     height: 4rem;
 }
 
-#pages {
-    display: none;
-}
-
 .page {
     padding: 1rem;
     display: flex;
@@ -192,9 +188,10 @@ footer {
 }
 
 .sheet-music-display {
+    margin: 0 8rem 0 8rem;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-end;
     padding-bottom: 2rem;
 }
 
@@ -227,32 +224,32 @@ footer {
 }
 
 #page-learn {
-
+    margin: 0 8rem 0 8rem;
     display: flex;
     flex-direction: row;
-    justify-content: center;
+    justify-content: flex-end;
     align-items: center;
 }
 
 #visualizer {
     padding: 1rem;
     position: fixed;
-    top: 25%;
-    left: 2%;
+    top: 26%;
+    left: 12%;
 }
 
 #control-buttons {
     display: flex;
     flex-direction: column;
     position: fixed;
-    top: 60%;
-    left: 7%;
+    top: 63%;
+    left: 17%;
 }
 
 #feedback {
     position: fixed;
-    top: 59%;
-    left: 17%;
+    top: 62%;
+    left: 27%;
 }
 
 #note {
@@ -264,7 +261,7 @@ footer {
 #notes {
     position: fixed;
     top: 44%;
-    left: 2%;
+    left: 15%;
     color: whitesmoke;
 }
 
@@ -406,11 +403,11 @@ input[type=range]::-ms-thumb {
     background-color: #F2F2DE;
     color: #112d32;
     z-index: 0;
-    text-shadow: 0px 1px 1px #88BDBC;
+    text-shadow: 0 1px 1px #88BDBC;
 }
 
 .keyboard-holder {
-    margin: 30px auto;
+    margin: 2rem auto;
     height: 200px;
     position: relative;
     user-select: none;

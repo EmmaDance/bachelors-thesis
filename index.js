@@ -11,7 +11,7 @@ import {Score} from "./js/sheet-music";
 import {Ajax} from "./js/service-utils";
 import {UI} from "./js/ui";
 import {Tests} from "./js/tests";
-import {Music} from "./js/music";
+import {getNoteFromMidi, Music} from "./js/music";
 import AudioPlayer from "osmd-audio-player";
 import {OpenSheetMusicDisplay, PageFormat} from "opensheetmusicdisplay";
 import {PlaybackEvent} from "osmd-audio-player/src/PlaybackEngine";
@@ -24,7 +24,8 @@ Music.init();
 let pos = 0;
 let measure = 0;
 
-$(document).ready(function () {
+$(document).ready(async function () {
+       await $(".load-score").load("pages/score.html");
 // Create OSMD object and canvas
     let osmd = new OpenSheetMusicDisplay("score", {
         autoResize: true,
@@ -56,16 +57,14 @@ $(document).ready(function () {
             maintain_stem_directions: false
         },
 
-        // tupletsBracketed: true, // creates brackets for all tuplets except triplets, even when not set by xml
-        // tripletsBracketed: true,
-        // tupletsRatioed: true, // unconventional; renders ratios for tuplets (3:2 instead of 3 for triplets)
+        tupletsBracketed: true, // creates brackets for all tuplets except triplets, even when not set by xml
+        tripletsBracketed: true,
     });
     osmd.setLogLevel('debug'); // set this to 'debug' if you want to see more detailed control flow information in console
 
     import("./js/playKeyboard").then(function (kb) {
         kb.playKeyboard();
     });
-
 
     $("#upload-btn").on("click", async function () {
         console.log("upload btn clicked");
@@ -74,7 +73,6 @@ $(document).ready(function () {
     });
 
     $("#change-music-btn").on("click", async function () {
-        console.log("Change btn clicked");
         Score.clearLocalStorage();
         await Score.renderPage(osmd, audioPlayer);
         reset();
@@ -142,13 +140,11 @@ $(document).ready(function () {
             const voices = iterator.CurrentVoiceEntries;
             const v = voices[0];
             const notes = v.notes;
-            // const bpm = osmd.Sheet.userStartTempoInBPM;
             const bpm = parseInt($("#tempoOutputId").text());
             console.log(bpm);
             for (var j = 0; j < notes.length; j++) {
                 const note = notes[j];
                 if ((note != null)) {
-                    // console.log(note);
                     allNotes.push({
                         "note": note.halfTone + 12,
                         "time": iterator.CurrentSourceTimestamp.RealValue * 4 * 60 / bpm
@@ -181,14 +177,16 @@ $(document).ready(function () {
     }
 
 // Older browsers might not implement mediaDevices at all, so we set an empty object first
-
     if (navigator.mediaDevices === undefined) {
         navigator.mediaDevices = {};
     }
 
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    // console.log(audioCtx.sampleRate);
+    console.log(audioCtx.sampleRate);
     const audioPlayer = new AudioPlayer();
+        audioPlayer.on(PlaybackEvent.ITERATION, notes => {
+            $("#note-listen").text(getNoteFromMidi(notes[0].halfTone));
+        });
     Score.renderPage(osmd, audioPlayer);
 
 // const biquadFilter = audioCtx.createBiquadFilter();

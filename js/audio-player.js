@@ -14,4 +14,6 @@ export function registerButtonEvents(audioPlayer) {
             audioPlayer.stop();
         }
     });
+
+    
 }
