@@ -2,6 +2,7 @@ import {OpenSheetMusicDisplay} from "opensheetmusicdisplay";
 import {registerButtonEvents} from "./audio-player";
 
 let song = [];
+
 // parses the .musicxml file and returns the information needed about the notes: pitch(step and octave) --and duration
 function parseMusic(sheetMusic) {
     song.clear();
@@ -131,7 +132,7 @@ function clearLocalStorage() {
 }
 
 async function renderPage(osmd, audioPlayer) {
-    console.log("render page");
+    // console.log("render page");
     if (localStorage.getItem("hasScore") === 'true') {
         $("#init-song").text(localStorage.getItem("song"));
         $("#initialize").css("display", "none");
@@ -145,10 +146,35 @@ async function renderPage(osmd, audioPlayer) {
     }
 }
 
+// returns a list of objects, each containing the note an its absolute duration, in seconds
+function getDurations(osmd) {
+    var allNotes = []
+    const iterator = osmd.cursor.Iterator;
+    while (!iterator.EndReached) {
+        const voices = iterator.CurrentVoiceEntries;
+        const v = voices[0];
+        const notes = v.notes;
+        const bpm = parseInt($("#tempoOutputId").text());
+        console.log(bpm);
+        for (var j = 0; j < notes.length; j++) {
+            const note = notes[j];
+            if ((note != null)) {
+                allNotes.push({
+                    "note": note.halfTone + 12,
+                    "time": iterator.CurrentSourceTimestamp.RealValue * 4 * 60 / bpm
+                });
+            }
+        }
+        iterator.moveToNext();
+    }
+    return allNotes;
+}
+
 export const Score = {
     parseMusic: parseMusic,
     readFile: readFile,
     loadMusic: loadMusic,
+    getDurations:getDurations,
     renderPage: renderPage,
     clearLocalStorage: clearLocalStorage,
     song:song,

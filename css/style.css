@@ -112,7 +112,7 @@ main {
     margin-top: 0.5em;
 }
 
-#canvas-time, #canvas-frequency {
+#canvas-time, #canvas-frequency, #canvas-master {
     margin-left: auto;
     margin-right: auto;
     display: block;
@@ -136,7 +136,7 @@ footer {
     padding: 1rem;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    /*align-items: center;*/
 }
 
 .page-title {
@@ -210,7 +210,7 @@ footer {
 
 /* ------- LEARN page -------- */
 
-#up, #down, #correct {
+.up, .down, .correct {
     color: whitesmoke;
 }
 
@@ -246,7 +246,7 @@ footer {
     left: 17%;
 }
 
-#feedback {
+.feedback {
     position: fixed;
     top: 62%;
     left: 27%;

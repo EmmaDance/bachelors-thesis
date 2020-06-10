@@ -1,29 +1,32 @@
+import {Score} from "./sheet-music";
+import {Ajax} from "./service-utils";
+
 let canvasTime, canvasTimeCtx;
 let canvasFrequency, canvasFrequencyCtx;
 const WIDTH = 300, HEIGHT = 100;
 
 function correct() {
-    $("#correct").css("color", "green");
-    $("#up").css("color", "whitesmoke");
-    $("#down").css("color", "whitesmoke");
+    $(".correct").css("color", "green");
+    $(".up").css("color", "whitesmoke");
+    $("#.down").css("color", "whitesmoke");
 }
 
 function down() {
-    $("#correct").css("color", "whitesmoke");
-    $("#up").css("color", "darkred");
-    $("#down").css("color", "whitesmoke");
+    $(".correct").css("color", "whitesmoke");
+    $(".up").css("color", "darkred");
+    $(".down").css("color", "whitesmoke");
 }
 
 function up() {
-    $("#correct").css("color", "whitesmoke");
-    $("#up").css("color", "whitesmoke");
-    $("#down").css("color", "darkred");
+    $(".correct").css("color", "whitesmoke");
+    $(".up").css("color", "whitesmoke");
+    $(".down").css("color", "darkred");
 }
 
 function none() {
-    $("#correct").css("color", "whitesmoke");
-    $("#up").css("color", "whitesmoke");
-    $("#down").css("color", "whitesmoke");
+    $(".correct").css("color", "whitesmoke");
+    $(".up").css("color", "whitesmoke");
+    $(".down").css("color", "whitesmoke");
 }
 
 
@@ -66,26 +69,43 @@ function visualize_time(amplitudeArray) {
     }
 }
 
-function initVisualizerFrequency() {
-    canvasFrequency = document.getElementById('canvas');
+function initVisualizerFrequency(canvasId) {
+    canvasFrequency = document.getElementById(canvasId);
     canvasFrequencyCtx = canvasFrequency.getContext('2d');
     canvasFrequencyCtx.clearRect(0, 0, WIDTH, HEIGHT);
 }
 
-function initVisualizerFrequencyTrain() {
-    canvasFrequency = document.getElementById('canvas-frequency');
-    canvasFrequencyCtx = canvasFrequency.getContext('2d');
-    canvasFrequencyCtx.clearRect(0, 0, WIDTH, HEIGHT);
-}
 
 function initVisualizerTime() {
-    initVisualizerFrequencyTrain();
+    initVisualizerFrequency('canvas-train');
     canvasTime = document.getElementById('canvas-time');
     canvasTimeCtx = canvasTime.getContext('2d');
     canvasTimeCtx.clearRect(0, 0, WIDTH, HEIGHT);
 }
 
+function initButtons(osmd, audioPlayer) {
+    $("#upload-btn").on("click", async function () {
+        console.log("upload btn clicked");
+        const file = document.getElementById('file-input');
+        await Score.readFile(file, osmd, audioPlayer);
+    });
+
+    $("#change-music-btn").on("click", async function () {
+        Score.clearLocalStorage();
+        await Score.renderPage(osmd, audioPlayer);
+        reset();
+    });
+
+    $('#get-sample').click(async function () {
+        let score = await Ajax.getScore();
+        $("#loading-indicator").css("visibility", 'hidden');
+        await Score.loadMusic(score, osmd, audioPlayer);
+        await Score.renderPage(osmd, audioPlayer);
+    });
+}
+
 export const UI = {
+    initButtons:initButtons,
     initVisualizerFrequency: initVisualizerFrequency,
     initVisualizerTime: initVisualizerTime,
     visualize_frequency: visualize_frequency,

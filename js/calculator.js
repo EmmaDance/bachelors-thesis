@@ -1,7 +1,7 @@
 export function binarySearch(frequencies, min, max,errorSize) {
     const err = getErrorSize(max)*errorSize;
-    console.log("error ",err);
-    console.log("interval ",min-err," ",max+err);
+    // console.log("error ",err);
+    // console.log("interval ",min-err," ",max+err);
     const size = Object.keys(frequencies).length;
     let start = 0, end = size - 1;
     while (start <= end) {
@@ -159,6 +159,6 @@ export function getIndexOfLeftmostMaximum(dataArray){
         }
     }
     maxima.sort((a,b)=>{return a.index - b.index; })
-    console.log(maxima);
+    // console.log(maxima);
     return maxima[0].index;
 }
