@@ -166,10 +166,6 @@ function getDurations(osmd) {
         }
         iterator.moveToNext();
     }
-    allNotes.push({
-        "note": 0,
-        "time": iterator.CurrentSourceTimestamp.RealValue * 4 * 60 / bpm
-    });
     return allNotes;
 }
 

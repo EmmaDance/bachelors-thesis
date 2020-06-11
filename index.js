@@ -15,7 +15,7 @@ import {getNoteFromMidi, Music} from "./js/music";
 import AudioPlayer from "osmd-audio-player";
 import {OpenSheetMusicDisplay, PageFormat} from "opensheetmusicdisplay";
 import {PlaybackEvent} from "osmd-audio-player/src/PlaybackEngine";
-import { GraphicalNote } from 'opensheetmusicdisplay';
+import {GraphicalNote} from 'opensheetmusicdisplay';
 
 let jquery = require("jquery");
 window.$ = window.jQuery = jquery;
@@ -77,8 +77,8 @@ $(document).ready(async function () {
         // drawUpToMeasureNumber: 3, // draws only up to measure 3, meaning it draws measure 1 to 3 of the piece.
         // coloring options
         coloringEnabled: true,
-        defaultColorNotehead: "teal", // try setting a default color. default is black (undefined)
-        defaultColorStem: "#106d85",
+        defaultColorNotehead: "#3d4849", // try setting a default color. default is black (undefined)
+        defaultColorStem: "#3d4849",
         pageFormat: PageFormat.Endless,
         autoBeam: false,
         autoBeamOptions: {
@@ -112,8 +112,9 @@ $(document).ready(async function () {
         window.setTimeout.clearAll();
         window.setInterval.clearAll();
         stopRecording();
-        // osmd.cursor.reset();
-        // osmd.cursor.hide();
+        osmd.render();
+        osmd.cursor.reset();
+        osmd.cursor.hide();
     }
 
     function startCursorMaster() {
@@ -131,26 +132,26 @@ $(document).ready(async function () {
                 window.setInterval.clearAll();
             k++;
         }, pause);
-        window.setTimeout(()=>{
+        window.setTimeout(() => {
             osmd.cursor.reset();
             osmd.cursor.show();
             // console.log(allNotes);
             let i = 1;
             let oldTime = 0;
             let newTime = allNotes[i].time;
+            // measure the duration of the notes and move the cursor accordingly
             window.setTimeout(function run() {
-                osmd.cursor.next();
                 // trigger event
                 $(document).trigger("cursor:next");
-                i++;
+                osmd.cursor.next();
                 if (i >= allNotes.length)
                     return;
+                i++;
                 oldTime = allNotes[i - 1].time;
                 newTime = allNotes[i].time - oldTime;
                 window.setTimeout(run, newTime * 1000 - 30);
             }, newTime * 1000);
-        },pause*(num+1));
-
+        }, pause * (num + 1));
     }
 
     $("#start-train").on("click", function () {
@@ -209,7 +210,6 @@ $(document).ready(async function () {
     }
 
     function startM() {
-        // osmd.setOptions({renderSingleHorizontalStaffline: true});
         bufferLength = analyser.frequencyBinCount;
         dataArray = new Uint8Array(bufferLength);
         fDataArray = new Float32Array(bufferLength);
@@ -218,40 +218,28 @@ $(document).ready(async function () {
         let crt = 0;
         let ok = false;
         let progressBar = $(".progress-bar");
-        let songLength = Score.song.length
+        let songLength = Score.song.length;
         progressBar.attr('ariavalue-max', songLength);
         progressBar.attr('aria-valuenow', 0);
         // on event cursor:next
         $(document).on("cursor:next", function () {
-            console.log("On cursor next");
-            if (crt === Score.song.length-1){
-                stopMaster();
-                osmd.render();
-            }
             let isRest = osmd.cursor.NotesUnderCursor()[0].isRest();
-            if (isRest) {
-                ok = true;
-                console.log("break");
-            }
             if (ok) {
                 makeProgress();
-                // let a = osmd.cursor.Iterator.CurrentMeasure.VerticalMeasureList[0];
-                // let b = a.StaffEntries[0];
-                // let c = b.graphicalVoiceEntries[0];
-                // let d = c.notes[0];
-                // let e = d.vfnote[0];
-                // e.color = "#565656";
-                osmd.cursor.NotesUnderCursor()[0].NoteheadColor = "#07ba0d";
-                console.log(Score.song[crt]);
-            }
-            else{
-                osmd.cursor.NotesUnderCursor()[0].NoteheadColor = "#d12008";
-            }
+                osmd.cursor.NotesUnderCursor()[0].NoteheadColor = "#4ae262";
+                console.log("ok",Score.song[crt]);
+            } else {
+                osmd.cursor.NotesUnderCursor()[0].NoteheadColor = "#ff5340";
+                console.log("not ok",Score.song[crt]);
 
+            }
             if (!isRest) {
                 crt++;
             }
             ok = false;
+            if (crt === Score.song.length) {
+                stopMaster();
+            }
         });
         var i = 0;
 
