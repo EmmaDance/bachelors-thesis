@@ -29,7 +29,6 @@ function none() {
     $(".down").css("color", "whitesmoke");
 }
 
-
 function visualize_frequency(dataArray, indexOfMax) {
     canvasFrequencyCtx.fillStyle = 'rgb(255, 255, 255)';
     canvasFrequencyCtx.fillRect(0, 0, WIDTH, HEIGHT);
@@ -41,22 +40,9 @@ function visualize_frequency(dataArray, indexOfMax) {
     for (let i = 0; i < dataArray.length; i++) {
         barHeight = dataArray[i];
         canvasFrequencyCtx.fillStyle = 'rgb(15,31,35)';
-        // if (i === indexOfMax) {
-        //     canvasFrequencyCtx.fillStyle = 'rgb(255,0,0)';
-        //     console.log(i);
-        //     canvasFrequencyCtx.fillRect(x, HEIGHT - barHeight / 2, barWidth+10, barHeight / 2);
-        // } else
-            canvasFrequencyCtx.fillRect(x, HEIGHT - barHeight / 2, barWidth, barHeight / 2);
-
+        canvasFrequencyCtx.fillRect(x, HEIGHT - barHeight / 2, barWidth, barHeight / 2);
         x += barWidth + 1;
     }
-
-    // for (var i = 0; i < frequencyArray.length; i++) {
-    //     canvasFrequencyCtx.fillStyle = 'red';                             // **
-    //     var y = canvasHeight - Math.round(frequencyArray[i]);  // **
-    //     canvasFrequencyCtx.fillRect(i, 0, 1, y);                                 // **
-    // }
-
 }
 
 function visualize_time(amplitudeArray) {
@@ -75,7 +61,6 @@ function initVisualizerFrequency(canvasId) {
     canvasFrequencyCtx.clearRect(0, 0, WIDTH, HEIGHT);
 }
 
-
 function initVisualizerTime() {
     initVisualizerFrequency('canvas-train');
     canvasTime = document.getElementById('canvas-time');
@@ -84,16 +69,20 @@ function initVisualizerTime() {
 }
 
 function initButtons(osmd, audioPlayer) {
-    $("#upload-btn").on("click", async function () {
-        console.log("upload btn clicked");
-        const file = document.getElementById('file-input');
-        await Score.readFile(file, osmd, audioPlayer);
-    });
-
     $("#change-music-btn").on("click", async function () {
+        $("#page-train").css("display", "none");
         Score.clearLocalStorage();
         await Score.renderPage(osmd, audioPlayer);
-        reset();
+        // reset();
+    });
+
+    $("#upload-btn").on("click", async function () {
+        const file = document.getElementById('file-input');
+        await Score.readFile(file, osmd, audioPlayer).then(() => {
+            $("#page-train").css("display","none");
+            $("#score-btn").css("display", "inline");
+            $("#change-music-btn").html("Change Sheet Music <i class=\"fas fa-file-alt\"></i>");
+        });
     });
 
     $('#get-sample').click(async function () {
@@ -101,11 +90,28 @@ function initButtons(osmd, audioPlayer) {
         $("#loading-indicator").css("visibility", 'hidden');
         await Score.loadMusic(score, osmd, audioPlayer);
         await Score.renderPage(osmd, audioPlayer);
+        $("#score-btn").css("display", "inline");
+        $("#change-music-btn").text("Change Sheet Music");
     });
+
+    $("#train-btn").on("click", async function () {
+        $("#page-train").css("display", "flex");
+        $("#initialize").css("display", "none");
+        $("#navigation").css("display", "none");
+        $("#pages").css("display", "none");
+    });
+
+    $("#score-btn").on("click", async function () {
+        $("#page-train").css("display", "none");
+        $("#initialize").css("display", "none");
+        $("#navigation").css("display", "inline");
+        $("#pages").css("display", "inline");
+    });
+
 }
 
 export const UI = {
-    initButtons:initButtons,
+    initButtons: initButtons,
     initVisualizerFrequency: initVisualizerFrequency,
     initVisualizerTime: initVisualizerTime,
     visualize_frequency: visualize_frequency,

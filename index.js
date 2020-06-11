@@ -16,6 +16,7 @@ import AudioPlayer from "osmd-audio-player";
 import {OpenSheetMusicDisplay, PageFormat} from "opensheetmusicdisplay";
 import {PlaybackEvent} from "osmd-audio-player/src/PlaybackEngine";
 import {GraphicalNote} from 'opensheetmusicdisplay';
+import {startCursorMaster, stopMaster} from "./js/master-page";
 
 let jquery = require("jquery");
 window.$ = window.jQuery = jquery;
@@ -29,40 +30,6 @@ import("./js/playKeyboard").then(function (kb) {
 if (navigator.mediaDevices === undefined) {
     navigator.mediaDevices = {};
 }
-
-(function (deferFunctions) {
-    for (var setter in deferFunctions) (function (setter, clearer) {
-        var ids = [];
-        var startFn = window[setter];
-        var clearFn = window[clearer];
-
-        function clear(id) {
-            var index = ids.indexOf(id);
-            if (index !== -1) ids.splice(index, 1);
-            return clearFn.apply(window, arguments);
-        }
-
-        function set() {
-            var id = startFn.apply(window, arguments);
-            ids.push(id);
-            return id;
-        }
-
-        set.clearAll = function () {
-            ids.slice(0).forEach(clear);
-        };
-
-        if (startFn && clearFn) {
-            window[setter] = set;
-            window[clearer] = clear;
-        }
-    })(setter, deferFunctions[setter]);
-})(
-    {
-        setTimeout: 'clearTimeout'
-        , setInterval: 'clearInterval'
-        , requestAnimationFrame: 'cancelAnimationFrame'
-    });
 
 $(document).ready(async function () {
     let osmd = new OpenSheetMusicDisplay("score", {
@@ -90,14 +57,13 @@ $(document).ready(async function () {
         tripletsBracketed: true,
     });
     osmd.setLogLevel('debug'); // set this to 'debug' if you want to see more detailed control flow information in console
+
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     // console.log(audioCtx.sampleRate); // 48000
     const analyser = audioCtx.createAnalyser();
     analyser.smoothingTimeConstant = 0.92;
     analyser.fftSize = 8192;
     let bufferLength = analyser.frequencyBinCount;
-    let dataArray = new Uint8Array(bufferLength);
-    let fDataArray = new Uint8Array(bufferLength);
     const bandSize = audioCtx.sampleRate / analyser.fftSize;
     let running = false;
 
@@ -105,54 +71,10 @@ $(document).ready(async function () {
     audioPlayer.on(PlaybackEvent.ITERATION, notes => {
         $("#note-listen").text(getNoteFromMidi(notes[0].halfTone));
     });
+
     Score.renderPage(osmd, audioPlayer);
     UI.initButtons(osmd, audioPlayer);
-
-    function stopMaster() {
-        window.setTimeout.clearAll();
-        window.setInterval.clearAll();
-        stopRecording();
-        osmd.render();
-        osmd.cursor.reset();
-        osmd.cursor.hide();
-    }
-
-    function startCursorMaster() {
-        let allNotes = Score.getDurations(osmd);
-        const metronome = document.querySelector('#metronome');
-        let playPromise;
-        const bpm = parseInt($("#tempoOutputId").text());
-        let pause = 60 / bpm * 1000;
-        let k = 0;
-        let num = 4 // rhythm
-        window.setInterval(() => {
-            playPromise = metronome.play();
-            console.log("played ", k);
-            if (k >= num)
-                window.setInterval.clearAll();
-            k++;
-        }, pause);
-        window.setTimeout(() => {
-            osmd.cursor.reset();
-            osmd.cursor.show();
-            // console.log(allNotes);
-            let i = 1;
-            let oldTime = 0;
-            let newTime = allNotes[i].time;
-            // measure the duration of the notes and move the cursor accordingly
-            window.setTimeout(function run() {
-                // trigger event
-                $(document).trigger("cursor:next");
-                osmd.cursor.next();
-                if (i >= allNotes.length)
-                    return;
-                i++;
-                oldTime = allNotes[i - 1].time;
-                newTime = allNotes[i].time - oldTime;
-                window.setTimeout(run, newTime * 1000 - 30);
-            }, newTime * 1000);
-        }, pause * (num + 1));
-    }
+    // $("#page-train").load("pages/training.html");
 
     $("#start-train").on("click", function () {
         startRecording(startT);
@@ -177,7 +99,8 @@ $(document).ready(async function () {
     });
 
     $("#stop-master").on("click", function () {
-        stopMaster();
+        stopMaster(osmd);
+        stopRecording();
     });
 
     function stopRecording() {
@@ -209,70 +132,49 @@ $(document).ready(async function () {
         }
     }
 
-    function startM() {
+    function startT() {
+        let note = "-";
+        let len = 0;
         bufferLength = analyser.frequencyBinCount;
-        dataArray = new Uint8Array(bufferLength);
-        fDataArray = new Float32Array(bufferLength);
-        UI.initVisualizerFrequency('canvas-master');
-        startCursorMaster();
-        let crt = 0;
-        let ok = false;
-        let progressBar = $(".progress-bar");
-        let songLength = Score.song.length;
-        progressBar.attr('ariavalue-max', songLength);
-        progressBar.attr('aria-valuenow', 0);
-        // on event cursor:next
-        $(document).on("cursor:next", function () {
-            let isRest = osmd.cursor.NotesUnderCursor()[0].isRest();
-            if (ok) {
-                makeProgress();
-                osmd.cursor.NotesUnderCursor()[0].NoteheadColor = "#4ae262";
-                console.log("ok",Score.song[crt]);
-            } else {
-                osmd.cursor.NotesUnderCursor()[0].NoteheadColor = "#ff5340";
-                console.log("not ok",Score.song[crt]);
-
-            }
-            if (!isRest) {
-                crt++;
-            }
-            ok = false;
-            if (crt === Score.song.length) {
-                stopMaster();
-            }
-        });
-        var i = 0;
-
-        function makeProgress() {
-            if (i < songLength) {
-                i = i + 1;
-                progressBar.css("width", i * 100 / songLength + "%").text(Math.round(i * 100 / songLength) + "%");
-            }
-        }
-
+        let dataArray = new Uint8Array(bufferLength);
+        let fDataArray = new Float32Array(bufferLength);
+        UI.initVisualizerTime();
         let drawVisual;
         const frame = function () {
-            // console.log("timestamp: ", Date.now());
             if (running)
                 drawVisual = requestAnimationFrame(frame);
             analyser.getFloatFrequencyData(fDataArray);
-            analyser.getByteFrequencyData(dataArray);
             let indexOfMax = getIndexOfLeftmostMaximum(fDataArray);
             let min = indexOfMax * bandSize;
             let max = min + bandSize;
             let frequency = getNoteFrequency(Music.frequencies, min, max, 1);
-            // console.log(frequency);
+            console.log(frequency);
             let crtNote = Music.notes[frequency];
-            if (crtNote === Score.song[crt]) {
-                ok = true;
-                UI.correct();
-            } else if (Music.noteMap[crtNote] < Music.noteMap[Score.song[crt]]) {
-                UI.down();
+            if (crtNote === note) {
+                len++;
+                if (len > 4) {
+                    // display the note
+                    $("#note-train").text(crtNote);
+                    console.log("note is " + note);
+                    $(".frequency-img").css("display", "none");
+                    let crtVisualiser = $(".undef");
+                    if (crtNote !== undefined) {
+                        crtVisualiser = $(document.getElementById(crtNote + "t"));
+                        crtVisualiser.css("display", "block");
+                        crtVisualiser = $(document.getElementById(crtNote));
+                    }
+                    crtVisualiser.css("display", "block");
+                }
             } else {
-                UI.up();
+                len = 1;
+                note = crtNote;
             }
-            UI.visualize_frequency(dataArray, indexOfMax);
-        };
+            analyser.getByteTimeDomainData(dataArray);
+            UI.visualize_time(dataArray);
+            analyser.getByteFrequencyData(dataArray);
+            UI.visualize_frequency(dataArray);
+        }
+
         frame();
     }
 
@@ -282,8 +184,8 @@ $(document).ready(async function () {
         let crt = 0;
         let crt_song = $("#crt-song");
         bufferLength = analyser.frequencyBinCount;
-        dataArray = new Uint8Array(bufferLength);
-        const fDataArray = new Float32Array(bufferLength);
+        let dataArray = new Uint8Array(bufferLength);
+        let fDataArray = new Float32Array(bufferLength);
 
         UI.initVisualizerFrequency('canvas');
         let len = 0;
@@ -365,51 +267,73 @@ $(document).ready(async function () {
         frame();
     }
 
-    function startT() {
-        let note = "-";
-        let len = 0;
+    function startM() {
         bufferLength = analyser.frequencyBinCount;
-        dataArray = new Uint8Array(bufferLength);
-        fDataArray = new Float32Array(bufferLength);
-        UI.initVisualizerTime();
+        let dataArray = new Uint8Array(bufferLength);
+        let fDataArray = new Float32Array(bufferLength);
+        UI.initVisualizerFrequency('canvas-master');
+        startCursorMaster(osmd);
+        let crt = 0;
+        let ok = false;
+        let progressBar = $(".progress-bar");
+        let songLength = Score.song.length;
+        progressBar.attr('ariavalue-max', songLength);
+        progressBar.attr('aria-valuenow', 0);
+        // on event cursor:next
+        $(document).on("cursor:next", function () {
+            let isRest = osmd.cursor.NotesUnderCursor()[0].isRest();
+            if (ok) {
+                makeProgress();
+                osmd.cursor.NotesUnderCursor()[0].NoteheadColor = "#4ae262";
+                console.log("ok",Score.song[crt]);
+            } else {
+                osmd.cursor.NotesUnderCursor()[0].NoteheadColor = "#ff5340";
+                console.log("not ok",Score.song[crt]);
+
+            }
+            if (!isRest) {
+                crt++;
+            }
+            ok = false;
+            if (crt === Score.song.length) {
+                stopMaster();
+            }
+        });
+        var i = 0;
+
+        function makeProgress() {
+            if (i < songLength) {
+                i = i + 1;
+                progressBar.css("width", i * 100 / songLength + "%").text(Math.round(i * 100 / songLength) + "%");
+            }
+        }
+
         let drawVisual;
         const frame = function () {
+            // console.log("timestamp: ", Date.now());
             if (running)
                 drawVisual = requestAnimationFrame(frame);
             analyser.getFloatFrequencyData(fDataArray);
+            analyser.getByteFrequencyData(dataArray);
             let indexOfMax = getIndexOfLeftmostMaximum(fDataArray);
             let min = indexOfMax * bandSize;
             let max = min + bandSize;
             let frequency = getNoteFrequency(Music.frequencies, min, max, 1);
-            console.log(frequency);
+            // console.log(frequency);
             let crtNote = Music.notes[frequency];
-            if (crtNote === note) {
-                len++;
-                if (len > 4) {
-                    // display the note
-                    $("#note-train").text(crtNote);
-                    console.log("note is " + note);
-                    $(".frequency-img").css("display", "none");
-                    let crtVisualiser = $(".undef");
-                    if (crtNote !== undefined) {
-                        crtVisualiser = $(document.getElementById(crtNote + "t"));
-                        crtVisualiser.css("display", "block");
-                        crtVisualiser = $(document.getElementById(crtNote));
-                    }
-                    crtVisualiser.css("display", "block");
-                }
+            if (crtNote === Score.song[crt]) {
+                ok = true;
+                UI.correct();
+            } else if (Music.noteMap[crtNote] < Music.noteMap[Score.song[crt]]) {
+                UI.down();
             } else {
-                len = 1;
-                note = crtNote;
+                UI.up();
             }
-            analyser.getByteTimeDomainData(dataArray);
-            UI.visualize_time(dataArray);
-            analyser.getByteFrequencyData(dataArray);
-            UI.visualize_frequency(dataArray);
-        }
-
+            UI.visualize_frequency(dataArray, indexOfMax);
+        };
         frame();
     }
+
 
 });
 

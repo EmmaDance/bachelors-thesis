@@ -138,6 +138,8 @@ async function renderPage(osmd, audioPlayer) {
         $("#initialize").css("display", "none");
         $("#navigation").css("display", "inline");
         $("#pages").css("display", "inline");
+        $("#change-music-btn").html("Change Sheet Music <i class=\"fas fa-file-alt\"></i>");
+        $("#score-btn").css("display","inline");
         await Score.loadMusic(localStorage.getItem("score"), osmd, audioPlayer);
     } else {
         $("#initialize").css("display", "inline");

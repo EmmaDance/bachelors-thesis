@@ -14,7 +14,11 @@
 <div id="page-container">
     <header>
         <section id="header-container">
-            <div class="btn btn-outline-light" id="change-music-btn">Change sheet music <i class="fas fa-file-alt"></i>
+            <div>
+
+            <div class="btn btn-outline-light" id="train-btn">Training <i class="fas fa-sliders-h"></i></div>
+            <div class="btn btn-outline-light" id="score-btn">Song practice <i class="fas fa-music"></i></div>
+            <div class="btn btn-outline-light" id="change-music-btn">Upload Sheet Music <i class="fas fa-file-alt"></i></div>
             </div>
             <div class="vertical-center">
                 <h1 id="title">master <em>MUSIC </em></h1>
@@ -40,11 +44,92 @@
                 </div>
             </div>
         </section>
+        <section class="page" id="page-train">
+            <article id="controls-train">
+                <button id="start-train" type="button" class="btn btn-outline-light"><h2>Start</h2></button>
+                <button id="stop-train" type="button" class="btn btn-outline-light"><h2>Stop</h2></button>
+            </article>
+            <article id="visualizer-train">
+                <article>
+                    <h4>Time domain data visualisation</h4>
+                    <canvas id="canvas-time" width="300" height="100"></canvas>
+                    <h4 id="time-caption">Reference time spectrum</h4>
+                    <div class="image-stack">
+                        <div class="image-bottom">
+                            <img src="assets/undef.PNG" class="undef frequency-img-base">
+                        </div><!--Image top-->
+                        <div class="image-top">
+                            <!--                                        <img src="assets/Fs3t.PNG" id="F#3t" class="frequency-img">-->
+                            <!--                                        <img src="assets/G3t.PNG" id="G3t" class="frequency-img">-->
+                            <!--                                        <img src="assets/Gs3t.PNG" id="G#3t" class="frequency-img">-->
+                            <img src="assets/A3t.PNG" id="A3t" class="frequency-img">
+                            <img src="assets/As3t.PNG" id="A#3t" class="frequency-img">
+                            <img src="assets/B3t.PNG" id="B3t" class="frequency-img">
+                            <img src="assets/C4t.PNG" id="C4t" class="frequency-img">
+                            <img src="assets/Cs4t.PNG" id="C#4t" class="frequency-img">
+                            <img src="assets/D4t.PNG" id="D4t" class="frequency-img">
+                            <img src="assets/Ds4t.PNG" id="D#4t" class="frequency-img">
+                            <img src="assets/E4t.PNG" id="E4t" class="frequency-img">
+                            <img src="assets/F4t.PNG" id="F4t" class="frequency-img">
+                            <img src="assets/Fs4t.PNG" id="F#4t" class="frequency-img">
+                            <img src="assets/G4t.PNG" id="G4t" class="frequency-img">
+                            <img src="assets/Gs4t.PNG" id="G#4t" class="frequency-img">
+                            <img src="assets/A4t.PNG" id="A4t" class="frequency-img">
+                            <img src="assets/As4t.PNG" id="A#4t" class="frequency-img">
+                            <img src="assets/B4t.PNG" id="B4t" class="frequency-img">
+                            <img src="assets/C5t.PNG" id="C5t" class="frequency-img">
+                            <img src="assets/Cs5t.PNG" id="C#5t" class="frequency-img">
+                            <img src="assets/D5t.PNG" id="D5t" class="frequency-img">
+                            <img src="assets/Ds5t.PNG" id="D#5t" class="frequency-img">
+                            <!--                              <img src="assets/E45t.PNG" id="E5t" class="frequency-img">-->
+                        </div> <!--Image bottom-->
+                    </div> <!--Image stack-->
+                </article>
+                <article>
+                    <h4>Note</h4>
+                    <h1 id="note-train">-</h1>
+                </article>
+                <article>
+                    <h4>Frequency domain data visualisation</h4>
+                    <canvas id="canvas-train" width="300" height="100"></canvas>
+                    <h4 id="frequency-caption">Reference frequency spectrum</h4>
+                    <div class="image-stack">
+                        <div class="image-bottom">
+                            <img src="assets/undef.PNG" class="undef frequency-img-base">
+                        </div><!--Image top-->
+                        <div class="image-top">
+                            <img src="assets/Fs3.PNG" id="F#3" class="frequency-img">
+                            <img src="assets/G3.PNG" id="G3" class="frequency-img">
+                            <img src="assets/Gs3.PNG" id="G#3" class="frequency-img">
+                            <img src="assets/A3.PNG" id="A3" class="frequency-img">
+                            <img src="assets/As3.PNG" id="A#3" class="frequency-img">
+                            <img src="assets/B3.PNG" id="B3" class="frequency-img">
+                            <img src="assets/C4.PNG" id="C4" class="frequency-img">
+                            <img src="assets/Cs4.PNG" id="C#4" class="frequency-img">
+                            <img src="assets/D4.PNG" id="D4" class="frequency-img">
+                            <img src="assets/Ds4.PNG" id="D#4" class="frequency-img">
+                            <img src="assets/E4.PNG" id="E4" class="frequency-img">
+                            <img src="assets/F4.PNG" id="F4" class="frequency-img">
+                            <img src="assets/Fs4.PNG" id="F#4" class="frequency-img">
+                            <img src="assets/G4.PNG" id="G4" class="frequency-img">
+                            <img src="assets/Gs4.PNG" id="G#4" class="frequency-img">
+                            <img src="assets/A4.PNG" id="A4" class="frequency-img">
+                            <img src="assets/As4.PNG" id="A#4" class="frequency-img">
+                            <img src="assets/B4.PNG" id="B4" class="frequency-img">
+                            <img src="assets/C5.PNG" id="C5" class="frequency-img">
+                            <img src="assets/Cs5.PNG" id="C#5" class="frequency-img">
+                            <img src="assets/D5.PNG" id="D5" class="frequency-img">
+                            <!--                                <img src="assets/Ds5.PNG" id="D#5" class="frequency-img">-->
+                            <!--                                <img src="assets/E45.PNG" id="E5" class="frequency-img">-->
+                        </div> <!--Image bottom-->
+                    </div> <!--Image stack-->
+                </article>
+            </article>
+
+        </section>
         <section id="navigation">
             <nav>
                 <div class="nav nav-fill nav-tabs" id="nav-tab" role="tablist">
-                    <a class="nav-item nav-link" id="nav-train-tab" data-toggle="tab" href="#nav-train" role="tab"
-                       aria-controls="nav-train" aria-selected="false">Training</a>
                     <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#nav-home" role="tab"
                        aria-controls="nav-home" aria-selected="true">Listen</a>
                     <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#nav-profile" role="tab"
@@ -56,91 +141,6 @@
         </section>
         <section id="pages">
             <div class="tab-content" id="nav-tabContent">
-                <div class="tab-pane fade" id="nav-train" role="tabpanel" aria-labelledby="nav-train-tab">
-                    <!--                    page TRAIN     -->
-                    <section class="page" id="page-train">
-                        <article id="controls-train">
-                            <button id="start-train" type="button" class="btn btn-outline-light"><h2>Start</h2></button>
-                            <button id="stop-train" type="button" class="btn btn-outline-light"><h2>Stop</h2></button>
-                        </article>
-                        <article id="visualizer-train">
-                            <article>
-                                <h4>Time domain data visualisation</h4>
-                                <canvas id="canvas-time" width="300" height="100"></canvas>
-                                <h4 id="time-caption">Reference time spectrum</h4>
-                                <div class="image-stack">
-                                    <div class="image-bottom">
-                                        <img src="assets/undef.PNG" class="undef frequency-img-base">
-                                    </div><!--Image top-->
-                                    <div class="image-top">
-<!--                                        <img src="assets/Fs3t.PNG" id="F#3t" class="frequency-img">-->
-<!--                                        <img src="assets/G3t.PNG" id="G3t" class="frequency-img">-->
-<!--                                        <img src="assets/Gs3t.PNG" id="G#3t" class="frequency-img">-->
-                                        <img src="assets/A3t.PNG" id="A3t" class="frequency-img">
-                                        <img src="assets/As3t.PNG" id="A#3t" class="frequency-img">
-                                        <img src="assets/B3t.PNG" id="B3t" class="frequency-img">
-                                        <img src="assets/C4t.PNG" id="C4t" class="frequency-img">
-                                        <img src="assets/Cs4t.PNG" id="C#4t" class="frequency-img">
-                                        <img src="assets/D4t.PNG" id="D4t" class="frequency-img">
-                                        <img src="assets/Ds4t.PNG" id="D#4t" class="frequency-img">
-                                        <img src="assets/E4t.PNG" id="E4t" class="frequency-img">
-                                        <img src="assets/F4t.PNG" id="F4t" class="frequency-img">
-                                        <img src="assets/Fs4t.PNG" id="F#4t" class="frequency-img">
-                                        <img src="assets/G4t.PNG" id="G4t" class="frequency-img">
-                                        <img src="assets/Gs4t.PNG" id="G#4t" class="frequency-img">
-                                        <img src="assets/A4t.PNG" id="A4t" class="frequency-img">
-                                        <img src="assets/As4t.PNG" id="A#4t" class="frequency-img">
-                                        <img src="assets/B4t.PNG" id="B4t" class="frequency-img">
-                                        <img src="assets/C5t.PNG" id="C5t" class="frequency-img">
-                                        <img src="assets/Cs5t.PNG" id="C#5t" class="frequency-img">
-                                        <img src="assets/D5t.PNG" id="D5t" class="frequency-img">
-                                        <img src="assets/Ds5t.PNG" id="D#5t" class="frequency-img">
-                                        <!--                              <img src="assets/E45t.PNG" id="E5t" class="frequency-img">-->
-                                    </div> <!--Image bottom-->
-                                </div> <!--Image stack-->
-                            </article>
-                            <article>
-                                <h4>Note</h4>
-                                <h1 id="note-train">-</h1>
-                            </article>
-                            <article>
-                                <h4>Frequency domain data visualisation</h4>
-                                <canvas id="canvas-train" width="300" height="100"></canvas>
-                                <h4 id="frequency-caption">Reference frequency spectrum</h4>
-                                <div class="image-stack">
-                                    <div class="image-bottom">
-                                        <img src="assets/undef.PNG" class="undef frequency-img-base">
-                                    </div><!--Image top-->
-                                    <div class="image-top">
-                                        <img src="assets/Fs3.PNG" id="F#3" class="frequency-img">
-                                        <img src="assets/G3.PNG" id="G3" class="frequency-img">
-                                        <img src="assets/Gs3.PNG" id="G#3" class="frequency-img">
-                                        <img src="assets/A3.PNG" id="A3" class="frequency-img">
-                                        <img src="assets/As3.PNG" id="A#3" class="frequency-img">
-                                        <img src="assets/B3.PNG" id="B3" class="frequency-img">
-                                        <img src="assets/C4.PNG" id="C4" class="frequency-img">
-                                        <img src="assets/Cs4.PNG" id="C#4" class="frequency-img">
-                                        <img src="assets/D4.PNG" id="D4" class="frequency-img">
-                                        <img src="assets/Ds4.PNG" id="D#4" class="frequency-img">
-                                        <img src="assets/E4.PNG" id="E4" class="frequency-img">
-                                        <img src="assets/F4.PNG" id="F4" class="frequency-img">
-                                        <img src="assets/Fs4.PNG" id="F#4" class="frequency-img">
-                                        <img src="assets/G4.PNG" id="G4" class="frequency-img">
-                                        <img src="assets/Gs4.PNG" id="G#4" class="frequency-img">
-                                        <img src="assets/A4.PNG" id="A4" class="frequency-img">
-                                        <img src="assets/As4.PNG" id="A#4" class="frequency-img">
-                                        <img src="assets/B4.PNG" id="B4" class="frequency-img">
-                                        <img src="assets/C5.PNG" id="C5" class="frequency-img">
-                                        <img src="assets/Cs5.PNG" id="C#5" class="frequency-img">
-                                        <img src="assets/D5.PNG" id="D5" class="frequency-img">
-                                        <!--                                <img src="assets/Ds5.PNG" id="D#5" class="frequency-img">-->
-                                        <!--                                <img src="assets/E45.PNG" id="E5" class="frequency-img">-->
-                                    </div> <!--Image bottom-->
-                                </div> <!--Image stack-->
-                            </article>
-                        </article>
-                    </section>
-                </div>
                 <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
                     <!-- page LISTEN -->
                     <section class="page" id="page-listen">
@@ -187,7 +187,7 @@
                         </article>
                         <article class="feedback">
                             <h1 class="up"><i class="fa fa-arrow-up"></i></h1>
-                            <h1  class="correct"><i class="fa fa-check"></i></h1>
+                            <h1 class="correct"><i class="fa fa-check"></i></h1>
                             <h1 class="down"><i class="fa fa-arrow-down"></i></h1>
                         </article>
                         <article id="kb">
@@ -213,15 +213,16 @@
                                        min="40" max="150" oninput="tempoOutputId.value = tempoInputId.value">
                             </form>
                             <article class="master-buttons">
-                            <button id="start-master" type="button" class="btn btn-outline-light"><h2>Start</h2>
-                            </button>
-                            <button id="stop-master" type="button" class="btn btn-outline-light"><h2>Stop</h2></button>
+                                <button id="start-master" type="button" class="btn btn-outline-light"><h2>Start</h2>
+                                </button>
+                                <button id="stop-master" type="button" class="btn btn-outline-light"><h2>Stop</h2>
+                                </button>
                             </article>
                         </article>
                         <canvas id="canvas-master" width="300" height="100"></canvas>
                         <article class="feedback-master">
                             <h1 class="up"><i class="fa fa-arrow-up"></i></h1>
-                            <h1  class="correct"><i class="fa fa-check"></i></h1>
+                            <h1 class="correct"><i class="fa fa-check"></i></h1>
                             <h1 class="down"><i class="fa fa-arrow-down"></i></h1>
                         </article>
                     </section>
