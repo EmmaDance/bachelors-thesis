@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <title>Master music</title>
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/pages.css">
+    <link rel="stylesheet" href="css/keyboard.css">
     <link rel="stylesheet" href="css/bootstrap.css">
     <link rel="stylesheet" href="css/loader.css">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
@@ -33,7 +35,7 @@
                 <div class="card-body">
                     <h2 class="card-title">Get Started!</h2>
                     <p class="card-text">Upload a sheet music file to get started! Currently supported format:
-                        *.musicxml. </p>
+                        *.musicxml. (Uncompressed MusicXML)</p>
                     <form id="upload-form" enctype=multipart/form-data>
                         <input id="file-input" name="file-input" type="file" accept=".musicxml">
                         <!--                        <input id="upload-btn" type="button" class="btn btn-outline-dark" value="Upload">-->
@@ -99,6 +101,7 @@
                             <img src="assets/notes/A3n.PNG" id="A3n" class="note-img">
                             <img src="assets/notes/As3n.PNG" id="A#3n" class="note-img">
                             <img src="assets/notes/B3n.PNG" id="B3n" class="note-img">
+                            <img src="assets/notes/C4n.PNG" id="C4n" class="note-img">
                             <img src="assets/notes/Cs4n.PNG" id="C#4n" class="note-img">
                             <img src="assets/notes/D4n.PNG" id="D4n" class="note-img">
                             <img src="assets/notes/Ds4n.PNG" id="D#4n" class="note-img">
@@ -163,7 +166,7 @@
                     </div> <!--Image stack-->
                 </article>
             </article>
-
+            <div class="keyboard-holder" id="keyboard1"></div>
         </section>
         <section id="navigation">
             <nav>
@@ -201,6 +204,10 @@
                 <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
                     <section class="page" id="page-learn">
                         <!--     <h2 class="page-title">Learn the Melody</h2>-->
+                        <article id="kb">
+                            <h6>Help yourself! Get a reference for the notes when you are stuck.</h6>
+                            <div id="keyboard" class="keyboard-holder"></div>
+                        </article>
                         <article id="notes">
                             <!--    <h5>The notes of the song</h5>-->
                             <h6 id="init-song"></h6>
@@ -227,10 +234,6 @@
                             <h1 class="up"><i class="fa fa-arrow-up"></i></h1>
                             <h1 class="correct"><i class="fa fa-check"></i></h1>
                             <h1 class="down"><i class="fa fa-arrow-down"></i></h1>
-                        </article>
-                        <article id="kb">
-                            <h6>Help yourself! Get the reference notes when you are stuck.</h6>
-                            <div id="keyboard" class="keyboard-holder"></div>
                         </article>
                     </section>
                 </div>

@@ -45,7 +45,6 @@ export function mapFrequencies(notes, frequencies) {
         if (note < 0)
             note = 11;
     }
-
 }
 
 // create map of pairs (note, frequency)

@@ -1,7 +1,5 @@
 export function binarySearch(frequencies, min, max, errorSize) {
     const err = getErrorSize(max) * errorSize;
-    // console.log("error ",err);
-    // console.log("interval ",min-err," ",max+err);
     const size = Object.keys(frequencies).length;
     let start = 0, end = size - 1;
     while (start <= end) {
@@ -36,7 +34,6 @@ export function energy(signal) {
     for (let i = 0; i < signal.length; i++) {
         energy += Math.pow(Math.abs(signal[i]), 2);
     }
-
     return energy / 1000;
 }
 
@@ -128,8 +125,8 @@ function lower(note1, note2) {
 
 
 function isLocalMaximum(dataArray, x) {
-    // return dataArray[x]>dataArray[x-1] && dataArray[x]>dataArray[x+1] && dataArray[x]>dataArray[x+2] && dataArray[x]>dataArray[x-2];
-    return dataArray[x] > dataArray[x - 1] && dataArray[x] > dataArray[x + 1];
+    return dataArray[x]>dataArray[x-1] && dataArray[x]>dataArray[x+1] && dataArray[x]>dataArray[x+2] && dataArray[x]>dataArray[x-2];
+    // return dataArray[x] > dataArray[x - 1] && dataArray[x] > dataArray[x + 1];
 }
 
 
@@ -166,10 +163,10 @@ export function getIndexOfLeftmostMaximum(dataArray) {
     maxima.sort((a, b) => {
         return a.index - b.index;
     })
-    if (maxima[0] == undefined){
+    if (maxima[0] === undefined){
         console.log(dataArray);
         console.log(maxima);
+        return 0;
     }
-
     return maxima[0].index;
 }

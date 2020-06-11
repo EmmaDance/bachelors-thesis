@@ -24,7 +24,8 @@ require("./js/jquery-3.4.1");
 Tests.runAllTests();
 Music.init();
 import("./js/playKeyboard").then(function (kb) {
-    kb.playKeyboard();
+    kb.playKeyboard(); // the keyboard on the learning page
+    kb.playKeyboard1(); // the keyboard on the training page
 });
 // Older browsers might not implement mediaDevices at all, so we set an empty object first
 if (navigator.mediaDevices === undefined) {
@@ -36,15 +37,14 @@ $(document).ready(async function () {
         autoResize: true,
         backend: "svg",
         disableCursor: false,
-        drawingParameters: "compact", // try compact (instead of default)
-        drawPartNames: true, // try false
+        drawingParameters: "compact",
+        drawPartNames: true,
         drawFingerings: true,
-        fingeringPosition: "left", // left is default. try right. experimental: auto, above, below.
+        fingeringPosition: "left",
         setWantedStemDirectionByXml: true, // try false, which was previously the default behavior
-        // drawUpToMeasureNumber: 3, // draws only up to measure 3, meaning it draws measure 1 to 3 of the piece.
         // coloring options
         coloringEnabled: true,
-        defaultColorNotehead: "#3d4849", // try setting a default color. default is black (undefined)
+        defaultColorNotehead: "#3d4849",
         defaultColorStem: "#3d4849",
         pageFormat: PageFormat.Endless,
         autoBeam: false,
@@ -58,12 +58,12 @@ $(document).ready(async function () {
     });
     osmd.setLogLevel('debug'); // set this to 'debug' if you want to see more detailed control flow information in console
 
+    // Create Audio Context and set its options
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     // console.log(audioCtx.sampleRate); // 48000
     const analyser = audioCtx.createAnalyser();
-    analyser.smoothingTimeConstant = 0.92;
+    analyser.smoothingTimeConstant = 0.91;
     analyser.fftSize = 8192;
-    let bufferLength = analyser.frequencyBinCount;
     const bandSize = audioCtx.sampleRate / analyser.fftSize;
     let running = false;
 
@@ -74,10 +74,9 @@ $(document).ready(async function () {
 
     Score.renderPage(osmd, audioPlayer);
     UI.initButtons(osmd, audioPlayer);
-    // $("#page-train").load("pages/training.html");
 
     $("#start-train").on("click", function () {
-        startRecording(startT);
+        startRecording(startTraining);
     });
 
     $("#stop-train").on("click", function () {
@@ -88,14 +87,15 @@ $(document).ready(async function () {
         $("#congrats").css("visibility", "hidden");
         $("#crt-song").text("");
         UI.none();
-        startRecording(start);
+        startRecording(startLearning);
     });
+
     $("#stop").on("click", function () {
         stopRecording();
     });
 
     $("#start-master").on("click", function () {
-        startRecording(startM);
+        startRecording(startMaster);
     });
 
     $("#stop-master").on("click", function () {
@@ -132,10 +132,10 @@ $(document).ready(async function () {
         }
     }
 
-    function startT() {
+    function startTraining() {
         let note = "-";
         let len = 0;
-        bufferLength = analyser.frequencyBinCount;
+        let bufferLength = analyser.frequencyBinCount;
         let dataArray = new Uint8Array(bufferLength);
         let fDataArray = new Float32Array(bufferLength);
         UI.initVisualizerTime();
@@ -181,12 +181,12 @@ $(document).ready(async function () {
         frame();
     }
 
-    function start() {
+    function startLearning() {
         osmd.cursor.reset();
         osmd.cursor.show();
         let crt = 0;
         let crt_song = $("#crt-song");
-        bufferLength = analyser.frequencyBinCount;
+        let bufferLength = analyser.frequencyBinCount;
         let dataArray = new Uint8Array(bufferLength);
         let fDataArray = new Float32Array(bufferLength);
 
@@ -270,8 +270,8 @@ $(document).ready(async function () {
         frame();
     }
 
-    function startM() {
-        bufferLength = analyser.frequencyBinCount;
+    function startMaster() {
+        let bufferLength = analyser.frequencyBinCount;
         let dataArray = new Uint8Array(bufferLength);
         let fDataArray = new Float32Array(bufferLength);
         UI.initVisualizerFrequency('canvas-master');
@@ -285,6 +285,7 @@ $(document).ready(async function () {
         // on event cursor:next
         $(document).on("cursor:next", function () {
             let isRest = osmd.cursor.NotesUnderCursor()[0].isRest();
+            if (!isRest) {
             if (ok) {
                 makeProgress();
                 osmd.cursor.NotesUnderCursor()[0].NoteheadColor = "#48b461";
@@ -294,7 +295,6 @@ $(document).ready(async function () {
                 console.log("not ok",Score.song[crt]);
 
             }
-            if (!isRest) {
                 crt++;
             }
             ok = false;
