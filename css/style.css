@@ -112,10 +112,6 @@ main {
     margin: 1em;
 }
 
-#note-train {
-    margin-top: 0.5em;
-}
-
 #canvas-time, #canvas-train, #canvas-master {
     margin-left: auto;
     margin-right: auto;
@@ -176,6 +172,12 @@ footer {
     z-index: 1;
 }
 
+.note-img{
+    display: none;
+    margin: auto;
+    height:100px;
+}
+
 .frequency-img, .frequency-img-base {
     width: 300px;
     height: 100px;
@@ -185,9 +187,16 @@ footer {
 .frequency-img{
     display: none;
 }
+#note-caption{
+margin-top: 3rem;
+ }
 
-#frequency-caption {
-    /*margin-top: 6rem;*/
+#frequency-caption, #time-caption {
+    margin-top: 1rem;
+}
+
+#note-train {
+    margin-top: 2rem;
 }
 
 /* ------- LISTEN page -------- */

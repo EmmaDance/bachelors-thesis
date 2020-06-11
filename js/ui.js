@@ -5,22 +5,25 @@ let canvasTime, canvasTimeCtx;
 let canvasFrequency, canvasFrequencyCtx;
 const WIDTH = 300, HEIGHT = 100;
 
+const RED = "#ff5340";
+const GREEN = "#48b461";
+
 function correct() {
-    $(".correct").css("color", "green");
+    $(".correct").css("color", GREEN);
     $(".up").css("color", "whitesmoke");
     $(".down").css("color", "whitesmoke");
 }
 
 function down() {
     $(".correct").css("color", "whitesmoke");
-    $(".up").css("color", "darkred");
+    $(".up").css("color", RED);
     $(".down").css("color", "whitesmoke");
 }
 
 function up() {
     $(".correct").css("color", "whitesmoke");
     $(".up").css("color", "whitesmoke");
-    $(".down").css("color", "darkred");
+    $(".down").css("color", RED);
 }
 
 function none() {

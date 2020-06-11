@@ -157,9 +157,12 @@ $(document).ready(async function () {
                     $("#note-train").text(crtNote);
                     console.log("note is " + note);
                     $(".frequency-img").css("display", "none");
+                    $(".note-img").css("display", "none");
                     let crtVisualiser = $(".undef");
                     if (crtNote !== undefined) {
                         crtVisualiser = $(document.getElementById(crtNote + "t"));
+                        crtVisualiser.css("display", "block");
+                        crtVisualiser = $(document.getElementById(crtNote+"n"));
                         crtVisualiser.css("display", "block");
                         crtVisualiser = $(document.getElementById(crtNote));
                     }
@@ -284,7 +287,7 @@ $(document).ready(async function () {
             let isRest = osmd.cursor.NotesUnderCursor()[0].isRest();
             if (ok) {
                 makeProgress();
-                osmd.cursor.NotesUnderCursor()[0].NoteheadColor = "#4ae262";
+                osmd.cursor.NotesUnderCursor()[0].NoteheadColor = "#48b461";
                 console.log("ok",Score.song[crt]);
             } else {
                 osmd.cursor.NotesUnderCursor()[0].NoteheadColor = "#ff5340";
