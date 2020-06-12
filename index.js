@@ -57,7 +57,6 @@ $(document).ready(async function () {
         tripletsBracketed: true,
     });
     osmd.setLogLevel('debug'); // set this to 'debug' if you want to see more detailed control flow information in console
-
     // Create Audio Context and set its options
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     // console.log(audioCtx.sampleRate); // 48000
@@ -293,13 +292,12 @@ $(document).ready(async function () {
             } else {
                 osmd.cursor.NotesUnderCursor()[0].NoteheadColor = "#ff5340";
                 console.log("not ok",Score.song[crt]);
-
             }
                 crt++;
             }
             ok = false;
             if (crt === Score.song.length) {
-                stopMaster();
+                stopMaster(osmd);
             }
         });
         var i = 0;

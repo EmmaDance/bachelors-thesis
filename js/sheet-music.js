@@ -6,7 +6,6 @@ let song = [];
 // parses the .musicxml file and returns the information needed about the notes: pitch(step and octave) --and duration
 function parseMusic(sheetMusic) {
     song.clear();
-    console.log("INIT_SHEET_MUSIC");
     let prev = {
         "A": "G",
         "B": "A",
@@ -19,12 +18,11 @@ function parseMusic(sheetMusic) {
     const parser = new DOMParser();
     const xmlDoc = parser.parseFromString(sheetMusic, "text/xml");
     let notes = xmlDoc.getElementsByTagName("note");
-    let note, pitch, step, alter, octave, duration;
+    let note, pitch, step, alter, octave;
     for (let i = 0; i < notes.length; i += 1) {
         note = '';
         pitch = notes[i].childNodes[1];
         if (pitch.nodeName === 'rest') {
-
         } else {
             let pitchChildNodes = pitch.childNodes;
             for (let i = 0; i < pitchChildNodes.length; i++) {
@@ -35,19 +33,15 @@ function parseMusic(sheetMusic) {
                     alter = pitchChildNodes[i].childNodes[0].nodeValue;
                     if (alter === '1') {
                         note += "#";
-                        console.log('#')
                     } else if (alter === '-1')
                         note = prev[note] + "#";
                 } else if (pitchChildNodes[i].nodeName === "octave") {
                     octave = pitchChildNodes[i].childNodes[0].nodeValue;
                     note += octave;
-
                 }
             }
             song.push(note);
         }
-        duration = notes[i].childNodes[3].childNodes[0].nodeValue;
-        // console.log(duration);
     }
     return song;
 }
@@ -58,7 +52,6 @@ async function readFile(input, osmd, audioPlayer) {
     let reader = new FileReader();
 
     reader.onload = function () {
-        console.log("onload");
         $("#loading-indicator").css("visibility", 'hidden');
         loadMusic(reader.result, osmd, audioPlayer).then(
             () => {
@@ -68,35 +61,27 @@ async function readFile(input, osmd, audioPlayer) {
 
     };
     reader.onerror = function () {
-        console.log("onerror");
         console.error(reader.error);
         $("#loading-indicator").css("visibility", 'hidden');
 
     };
     reader.onprogress = function () {
-        console.log("onprogress");
-
         $("#loading-indicator").css("visibility", 'visible');
 
     }
-    // if (file.type.match(textType)) {
-    // console.log(file.type.match("vnd.recordare.musicxml"));
     reader.readAsText(file);
 }
 
-
 // renders the score and loads the audio player
 async function loadMusic(sheetMusic, osmd, audioPlayer) {
-    console.log('loadMusic');
     song = parseMusic(sheetMusic);
-    console.log("load music song = ", song);
-
-    $("#loading-indicator").css("visibility", "visible");
+    let loadingIndicator = $("#loading-indicator")
+    loadingIndicator.css("visibility", "visible");
     await osmd.load(sheetMusic);
     await osmd.render();
 
     await audioPlayer.loadScore(osmd);
-    $("#loading-indicator").css("visibility", "hidden");
+    loadingIndicator.css("visibility", "hidden");
     $("#showCursor").on("click",function () {
         if (osmd.cursor) {
             osmd.cursor.show();

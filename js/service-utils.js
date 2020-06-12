@@ -1,7 +1,7 @@
 async function getScore() {
     const url = 'http://localhost:3000/score/sample';
 
-    return await $.ajax({
+    return $.ajax({
         url: url,
         type: 'GET',
         success: function (res) {
@@ -10,7 +10,6 @@ async function getScore() {
         error: function (xhr, status, error) {
             console.log(error);
         }
-
     });
 }
 
