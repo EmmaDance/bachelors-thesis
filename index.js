@@ -98,6 +98,7 @@ $(document).ready(async function () {
     });
 
     $("#stop-master").on("click", function () {
+        $(document).unbind("cursor:next");
         stopMaster(osmd);
         stopRecording();
     });
@@ -282,7 +283,8 @@ $(document).ready(async function () {
         progressBar.attr('ariavalue-max', songLength);
         progressBar.attr('aria-valuenow', 0);
         // on event cursor:next
-        $(document).on("cursor:next", function () {
+        $(document).on("cursor:next", function cursorNextEvent() {
+            console.log("cursor next");
             let isRest = osmd.cursor.NotesUnderCursor()[0].isRest();
             if (!isRest) {
             if (ok) {
@@ -297,7 +299,9 @@ $(document).ready(async function () {
             }
             ok = false;
             if (crt === Score.song.length) {
+                $(document).unbind("cursor:next");
                 stopMaster(osmd);
+                stopRecording();
             }
         });
         var i = 0;
@@ -320,7 +324,6 @@ $(document).ready(async function () {
             let min = indexOfMax * bandSize;
             let max = min + bandSize;
             let frequency = getNoteFrequency(Music.frequencies, min, max, 1);
-            // console.log(frequency);
             let crtNote = Music.notes[frequency];
             if (crtNote === Score.song[crt]) {
                 ok = true;
@@ -334,7 +337,6 @@ $(document).ready(async function () {
         };
         frame();
     }
-
 
 });
 

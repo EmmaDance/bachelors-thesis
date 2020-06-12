@@ -36,24 +36,24 @@ import {Score} from "./sheet-music";
     });
 
 export function startCursorMaster(osmd) {
-    osmd.cursor.reset();
-    osmd.cursor.show();
     let allNotes = Score.getDurations(osmd);
     const metronome = document.querySelector('#metronome');
     let playPromise;
     const bpm = parseInt($("#tempoOutputId").text());
     let pause = 60 / bpm * 1000;
     let k = 0;
-    let num = 3 // rhythm
+    let num = 4 // rhythm
     window.setInterval(() => {
         playPromise = metronome.play();
         console.log("played ", k);
-        if (k >= num)
+        if (k >= num-1)
             window.setInterval.clearAll();
         k++;
     }, pause);
     window.setTimeout(() => {
-        console.log(allNotes);
+        osmd.cursor.reset();
+        osmd.cursor.show();
+        // console.log(allNotes);
         console.log("started iterating");
         let i = 1;
         let oldTime = 0;
@@ -64,7 +64,7 @@ export function startCursorMaster(osmd) {
             // trigger event
             $(document).trigger("cursor:next");
             osmd.cursor.next();
-            if (i >= allNotes.length)
+            if (i >= allNotes.length-1)
                 return;
             i++;
             oldTime = allNotes[i - 1].time;
