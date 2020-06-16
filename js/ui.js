@@ -32,7 +32,7 @@ function none() {
     $(".down").css("color", "whitesmoke");
 }
 
-function visualize_frequency(dataArray, indexOfMax) {
+function visualize_frequency(dataArray) {
     canvasFrequencyCtx.fillStyle = 'rgb(255, 255, 255)';
     canvasFrequencyCtx.fillRect(0, 0, WIDTH, HEIGHT);
 
@@ -76,7 +76,6 @@ function initButtons(osmd, audioPlayer) {
         $("#page-train").css("display", "none");
         Score.clearLocalStorage();
         await Score.renderPage(osmd, audioPlayer);
-        // reset();
     });
 
     $("#upload-btn").on("click", async function () {

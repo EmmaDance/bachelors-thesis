@@ -23,6 +23,7 @@ function parseMusic(sheetMusic) {
         note = '';
         pitch = notes[i].childNodes[1];
         if (pitch.nodeName === 'rest') {
+            note = 'rest';
         } else {
             let pitchChildNodes = pitch.childNodes;
             for (let i = 0; i < pitchChildNodes.length; i++) {
@@ -40,8 +41,8 @@ function parseMusic(sheetMusic) {
                     note += octave;
                 }
             }
-            song.push(note);
         }
+        song.push(note);
     }
     return song;
 }
@@ -55,7 +56,7 @@ async function readFile(input, osmd, audioPlayer) {
         $("#loading-indicator").css("visibility", 'hidden');
         loadMusic(reader.result, osmd, audioPlayer).then(
             () => {
-                renderPage(osmd,audioPlayer);
+                renderPage(osmd, audioPlayer);
             }
         )
 
@@ -82,7 +83,7 @@ async function loadMusic(sheetMusic, osmd, audioPlayer) {
 
     await audioPlayer.loadScore(osmd);
     loadingIndicator.css("visibility", "hidden");
-    $("#showCursor").on("click",function () {
+    $("#showCursor").on("click", function () {
         if (osmd.cursor) {
             osmd.cursor.show();
         } else {
@@ -96,7 +97,6 @@ async function loadMusic(sheetMusic, osmd, audioPlayer) {
             songStr += " ";
         }
         writeToLocalStorage(sheetMusic, songStr, true);
-        console.log('saved to local storage');
 
 
     }
@@ -117,14 +117,13 @@ function clearLocalStorage() {
 }
 
 async function renderPage(osmd, audioPlayer) {
-    // console.log("render page");
     if (localStorage.getItem("hasScore") === 'true') {
         $("#init-song").text(localStorage.getItem("song"));
         $("#initialize").css("display", "none");
         $("#navigation").css("display", "inline");
         $("#pages").css("display", "inline");
         $("#change-music-btn").html("Change Sheet Music <i class=\"fas fa-file-alt\"></i>");
-        $("#score-btn").css("display","inline");
+        $("#score-btn").css("display", "inline");
         await Score.loadMusic(localStorage.getItem("score"), osmd, audioPlayer);
     } else {
         $("#initialize").css("display", "inline");
@@ -160,9 +159,9 @@ export const Score = {
     parseMusic: parseMusic,
     readFile: readFile,
     loadMusic: loadMusic,
-    getDurations:getDurations,
+    getDurations: getDurations,
     renderPage: renderPage,
     clearLocalStorage: clearLocalStorage,
-    song:song,
+    song: song,
 }
 // export default song;

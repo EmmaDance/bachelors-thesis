@@ -36,6 +36,9 @@ import {Score} from "./sheet-music";
     });
 
 export function startCursorMaster(osmd) {
+    window.setInterval.clearAll();
+    window.setTimeout.clearAll();
+
     let allNotes = Score.getDurations(osmd);
     const metronome = document.querySelector('#metronome');
     let playPromise;
@@ -45,7 +48,6 @@ export function startCursorMaster(osmd) {
     let num = 4 // rhythm
     window.setInterval(() => {
         playPromise = metronome.play();
-        console.log("played ", k);
         if (k >= num-1)
             window.setInterval.clearAll();
         k++;
@@ -53,14 +55,11 @@ export function startCursorMaster(osmd) {
     window.setTimeout(() => {
         osmd.cursor.reset();
         osmd.cursor.show();
-        // console.log(allNotes);
-        console.log("started iterating");
         let i = 1;
         let oldTime = 0;
         let newTime = allNotes[i].time;
         // measure the duration of the notes and move the cursor accordingly
         window.setTimeout(function run() {
-            console.log(newTime );
             // trigger event
             $(document).trigger("cursor:next");
             osmd.cursor.next();
