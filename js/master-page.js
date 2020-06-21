@@ -38,23 +38,35 @@ import {Score} from "./sheet-music";
 export function startCursorMaster(osmd) {
     window.setInterval.clearAll();
     window.setTimeout.clearAll();
+    osmd.cursor.reset();
+    osmd.cursor.show();
+    console.log(osmd)
 
-    let allNotes = Score.getDurations(osmd);
     const metronome = document.querySelector('#metronome');
     let playPromise;
     const bpm = parseInt($("#tempoOutputId").text());
     let pause = 60 / bpm * 1000;
     let k = 0;
     let num = 4 // rhythm
-    window.setInterval(() => {
+    /*
+        const sleep = ms => {
+            return new Promise(res => setTimeout(res, ms))
+        }
+        const startMetronome = async num => {
+            for (let i = 0; i < num; ++i) {
+              playPromise = metronome.play();
+              await sleep(pause)
+            }
+        }
+     */
+    const metronomeId = window.setInterval(() => {
         playPromise = metronome.play();
         if (k >= num-1)
-            window.setInterval.clearAll();
+            window.clearInterval(metronomeId);
         k++;
     }, pause);
     window.setTimeout(() => {
-        osmd.cursor.reset();
-        osmd.cursor.show();
+        let allNotes = Score.getDurations(osmd);
         let i = 1;
         let oldTime = 0;
         let newTime = allNotes[i].time;
@@ -63,8 +75,11 @@ export function startCursorMaster(osmd) {
             // trigger event
             $(document).trigger("cursor:next");
             osmd.cursor.next();
-            if (i >= allNotes.length-1)
+            console.log(i, allNotes.length);
+            if (i >= allNotes.length-1) {
+                stopMaster(osmd);
                 return;
+            }
             i++;
             oldTime = allNotes[i - 1].time;
             newTime = allNotes[i].time - oldTime;
@@ -79,4 +94,5 @@ export function stopMaster(osmd) {
     osmd.cursor.reset();
     osmd.cursor.hide();
     osmd.render();
+
 }

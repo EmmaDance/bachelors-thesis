@@ -60,12 +60,11 @@ $(document).ready(async function () {
     let running = false;
 
     const audioPlayer = new AudioPlayer();
+
     audioPlayer.on(PlaybackEvent.ITERATION, notes => {
         $("#note-listen").text(getNoteFromMidi(notes[0].halfTone));
-    });
+    })
 
-    Score.renderPage(osmd, audioPlayer);
-    UI.initButtons(osmd, audioPlayer);
 
     $("#start-train").on("click", function () {
         startRecording(startTraining);
@@ -138,6 +137,8 @@ $(document).ready(async function () {
                 drawVisual = requestAnimationFrame(frame);
             analyser.getFloatFrequencyData(fDataArray); // computes the FFT
             let indexOfMax = getIndexOfLeftmostMaximum(fDataArray);
+            if (!indexOfMax)
+                return;
             let min = indexOfMax * bandSize;
             let max = min + bandSize;
             let frequency = getNoteFrequency(Music.frequencies, min, max, 1);
@@ -213,6 +214,8 @@ $(document).ready(async function () {
                 return;
 
             let indexOfMax = getIndexOfLeftmostMaximum(fDataArray);
+            if (!indexOfMax)
+                return;
             let min = indexOfMax * bandSize;
             let max = min + bandSize;
             let frequency = getNoteFrequency(Music.frequencies, min, max, 0);
@@ -293,9 +296,13 @@ $(document).ready(async function () {
             analyser.getFloatFrequencyData(fDataArray);
             analyser.getByteFrequencyData(dataArray);
             let indexOfMax = getIndexOfLeftmostMaximum(fDataArray);
+            if (!indexOfMax)
+                return;
             let min = indexOfMax * bandSize;
             let max = min + bandSize;
             let frequency = getNoteFrequency(Music.frequencies, min, max, 1);
+            if (!frequency)
+                return;
             let crtNote = Music.notes[frequency];
             if (crtNote === Score.song[crt]) {
                 ok = true;
@@ -309,4 +316,10 @@ $(document).ready(async function () {
         };
         frame();
     }
+
+    // TODO It should work without timeout, but it does not. :v
+    setTimeout(async () => {
+        await Score.renderPage(osmd, audioPlayer);
+        UI.initButtons(osmd, audioPlayer);
+    }, 0)
 });

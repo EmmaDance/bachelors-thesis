@@ -59,7 +59,6 @@ async function readFile(input, osmd, audioPlayer) {
                 renderPage(osmd, audioPlayer);
             }
         )
-
     };
     reader.onerror = function () {
         console.error(reader.error);
@@ -76,20 +75,13 @@ async function readFile(input, osmd, audioPlayer) {
 // renders the score and loads the audio player
 async function loadMusic(sheetMusic, osmd, audioPlayer) {
     song = parseMusic(sheetMusic);
-    let loadingIndicator = $("#loading-indicator")
+    let loadingIndicator = $("#loading-indicator");
     loadingIndicator.css("visibility", "visible");
     await osmd.load(sheetMusic);
     await osmd.render();
 
     await audioPlayer.loadScore(osmd);
     loadingIndicator.css("visibility", "hidden");
-    $("#showCursor").on("click", function () {
-        if (osmd.cursor) {
-            osmd.cursor.show();
-        } else {
-            console.log("Can't show cursor, as it was disabled (e.g. by drawingParameters).");
-        }
-    });
     if (!(localStorage.getItem("hasScore") === 'true')) {
         let songStr = "";
         for (let note of song) {
@@ -97,8 +89,6 @@ async function loadMusic(sheetMusic, osmd, audioPlayer) {
             songStr += " ";
         }
         writeToLocalStorage(sheetMusic, songStr, true);
-
-
     }
     registerButtonEvents(audioPlayer);
     return song;
@@ -116,7 +106,7 @@ function clearLocalStorage() {
     localStorage.setItem('score', '');
 }
 
-async function renderPage(osmd, audioPlayer) {
+async function renderPage(osmd, audioPlayer, ) {
     if (localStorage.getItem("hasScore") === 'true') {
         $("#init-song").text(localStorage.getItem("song"));
         $("#initialize").css("display", "none");
@@ -152,6 +142,7 @@ function getDurations(osmd) {
         }
         iterator.moveToNext();
     }
+    osmd.cursor.reset()
     return allNotes;
 }
 

@@ -71,7 +71,7 @@ export function getIndexOfLeftmostMaximum(dataArray) {
     maxima.sort((a, b) => {
         return a.index - b.index;
     })
-    return maxima[0].index;
+    return maxima[0] && maxima[0].index;
 }
 
 
