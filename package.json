@@ -25,7 +25,7 @@
     "jquery": "3.5.0",
     "jquery-ui-dist": "1.12.1",
     "js": "0.1.0",
-    "opensheetmusicdisplay": "0.7.6",
+    "opensheetmusicdisplay": "1.5.7",
     "osmd-audio-player": "0.5.0",
     "popper.js": "1.16.1"
   },
